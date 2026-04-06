@@ -1,26 +1,142 @@
 @import "tailwindcss";
 
+/* ─── Design tokens ──────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --bg-primary:   #F2F2F7;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary:  #F2F2F7;
+  --bg-elevated:  rgba(255, 255, 255, 0.85);
+  --bg-overlay:   rgba(0, 0, 0, 0.4);
+
+  /* Text */
+  --text-primary:     #1C1C1E;
+  --text-secondary:   rgba(60, 60, 67, 0.6);
+  --text-tertiary:    rgba(60, 60, 67, 0.6);
+  --text-quaternary:  rgba(60, 60, 67, 0.18);
+
+  /* Accent colors */
+  --accent-blue:   #007AFF;
+  --accent-green:  #34C759;
+  --accent-red:    #FF3B30;
+  --accent-orange: #FF9500;
+  --accent-purple: #AF52DE;
+  --accent-teal:   #5AC8FA;
+  --accent-amber:  #FF9F0A;
+
+  /* Fills */
+  --separator:    rgba(60, 60, 67, 0.12);
+  --fill-primary: rgba(120, 120, 128, 0.2);
+  --fill-secondary: rgba(120, 120, 128, 0.16);
+
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+  /* Blur */
+  --blur-sm: blur(8px);
+  --blur-md: blur(16px);
+  --blur-lg: blur(40px);
+
+  /* Typography */
+  --text-xs:   11px;
+  --text-sm:   13px;
+  --text-base: 15px;
+  --text-lg:   17px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  34px;
 }
 
+/* ─── Tailwind v4 theme extensions ───────────────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-accent-blue:    #007AFF;
+  --color-accent-green:   #34C759;
+  --color-accent-red:     #FF3B30;
+  --color-accent-orange:  #FF9500;
+  --color-accent-purple:  #AF52DE;
+  --color-accent-teal:    #5AC8FA;
+  --color-accent-amber:   #FF9F0A;
+  --color-bg-primary:     #F2F2F7;
+  --color-bg-secondary:   #FFFFFF;
+
+  --shadow-app-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-app-md: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-app-lg: 0 8px 32px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Base styles ─────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+    system-ui, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* ─── Interactive states ──────────────────────────────────────────────────────── */
+button,
+a,
+[role="button"] {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Focus rings — Apple style ──────────────────────────────────────────────── */
+:focus-visible {
+  outline: 3px solid rgba(0, 122, 255, 0.5);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ─── Card hover lift ─────────────────────────────────────────────────────────── */
+.card-hover {
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.card-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* ─── Frosted glass utility ───────────────────────────────────────────────────── */
+.glass {
+  background: var(--bg-elevated);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+}
+
+/* ─── Skeleton loading ────────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--fill-primary) 25%,
+    var(--fill-secondary) 50%,
+    var(--fill-primary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Separator utility ───────────────────────────────────────────────────────── */
+.divide-separator > * + * {
+  border-top: 1px solid var(--separator);
 }

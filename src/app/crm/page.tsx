@@ -20,12 +20,20 @@ function fmt(n: number) {
 function statusBadge(s: AccountStatus) {
   const cls =
     s === "Active"
-      ? "bg-green-100 text-green-800"
+      ? "bg-green-50 text-green-700 border border-green-200"
       : s === "At Risk"
-      ? "bg-yellow-100 text-yellow-800"
-      : "bg-red-100 text-red-800";
-  return <span className={`px-2 py-0.5 rounded text-xs font-medium ${cls}`}>{s}</span>;
+      ? "bg-red-50 text-red-700 border border-red-200"
+      : "bg-gray-100 text-gray-600 border border-gray-200";
+  return (
+    <span
+      className={`px-2.5 py-0.5 rounded-full text-xs font-medium ${cls}`}
+    >
+      {s}
+    </span>
+  );
 }
+
+const STAT_ACCENTS = ["#007AFF", "#34C759", "#FF3B30", "#AF52DE"];
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -57,12 +65,10 @@ export default async function CrmPage({
 
   const data: AccountRow[] = await accountsRes.json();
 
-  // Integration health summary for header pill
-  const healthyCount  = vendors.filter((v) => v.status === "healthy").length;
-  const warningCount  = vendors.filter((v) => v.status === "warning").length;
-  const totalErrors   = vendors.reduce((s, v) => s + v.error_count, 0);
+  const healthyCount = vendors.filter((v) => v.status === "healthy").length;
+  const warningCount = vendors.filter((v) => v.status === "warning").length;
+  const totalErrors  = vendors.reduce((s, v) => s + v.error_count, 0);
 
-  // Sort
   let rows = [...data];
   if (sort === "arr") {
     rows.sort((a, b) => Number(a.arr) - Number(b.arr));
@@ -84,10 +90,9 @@ export default async function CrmPage({
     );
   }
 
-  // Stat cards
   const totalArr = rows.reduce((s, r) => s + Number(r.arr), 0);
   const totalEmp = rows.reduce((s, r) => s + r.employees, 0);
-  const atRisk = rows.filter((r) => r.status === "At Risk").length;
+  const atRisk   = rows.filter((r) => r.status === "At Risk").length;
   const avgMargin =
     rows.length === 0
       ? 0
@@ -98,54 +103,117 @@ export default async function CrmPage({
         }, 0) / rows.length;
 
   const stats = [
-    { label: "Total ARR", value: fmt(totalArr) },
+    { label: "Total ARR",        value: fmt(totalArr) },
     { label: "Avg Gross Margin", value: `${avgMargin.toFixed(1)}%` },
-    { label: "At Risk", value: String(atRisk) },
-    { label: "Total Employees", value: totalEmp.toLocaleString() },
+    { label: "At Risk",          value: String(atRisk) },
+    { label: "Total Employees",  value: totalEmp.toLocaleString() },
   ];
 
-  const pillColor = warningCount > 0 || totalErrors > 0
-    ? "bg-amber-50 text-amber-700 border-amber-200"
-    : "bg-green-50 text-green-700 border-green-200";
+  const pillColor =
+    warningCount > 0 || totalErrors > 0
+      ? "bg-amber-50 text-amber-700 border-amber-200"
+      : "bg-green-50 text-green-700 border-green-200";
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-5" style={{ background: "var(--bg-primary)" }}>
       {/* Integration health pill */}
       {vendors.length > 0 && (
         <div className="flex justify-end">
           <Link
             href="/settings"
-            className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-colors hover:opacity-80 ${pillColor}`}
+            className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-all hover:opacity-80 ${pillColor}`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${warningCount > 0 ? "bg-amber-500" : "bg-green-500"}`} />
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${warningCount > 0 ? "bg-amber-500" : "bg-green-500"}`}
+            />
             {healthyCount}/{vendors.length} integrations healthy
-            {totalErrors > 0 && <span className="ml-1">· {totalErrors} error{totalErrors !== 1 ? "s" : ""}</span>}
+            {totalErrors > 0 && (
+              <span className="ml-1">
+                · {totalErrors} error{totalErrors !== 1 ? "s" : ""}
+              </span>
+            )}
           </Link>
         </div>
       )}
 
       {/* Stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((s) => (
-          <div key={s.label} className="bg-white rounded-lg border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">{s.label}</p>
-            <p className="text-2xl font-semibold text-gray-900 mt-1">{s.value}</p>
+        {stats.map((s, i) => (
+          <div
+            key={s.label}
+            className="bg-white rounded-2xl p-5 card-hover"
+            style={{
+              borderLeft: `3px solid ${STAT_ACCENTS[i]}`,
+              boxShadow: "var(--shadow-sm)",
+              border: `1px solid var(--separator)`,
+              borderLeftWidth: "3px",
+              borderLeftColor: STAT_ACCENTS[i],
+            }}
+          >
+            <p
+              className="text-xs font-semibold uppercase tracking-wide mb-1"
+              style={{ color: "var(--text-secondary)", fontSize: "11px" }}
+            >
+              {s.label}
+            </p>
+            <p
+              className="font-semibold"
+              style={{ fontSize: "28px", lineHeight: "1.2", color: "var(--text-primary)" }}
+            >
+              {s.value}
+            </p>
           </div>
         ))}
       </div>
 
       {/* Search / sort */}
       <form method="GET" className="flex gap-3 items-center">
-        <input
-          name="search"
-          defaultValue={search}
-          placeholder="Search accounts…"
-          className="border border-gray-300 rounded px-3 py-1.5 text-sm flex-1 max-w-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative flex-1 max-w-xs">
+          <svg
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
+            style={{ color: "var(--text-secondary)" }}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+          <input
+            name="search"
+            defaultValue={search}
+            placeholder="Search accounts…"
+            className="w-full pl-9 pr-4 py-2 rounded-xl text-sm transition-all focus:outline-none"
+            style={{
+              background: "var(--fill-primary)",
+              color: "var(--text-primary)",
+              border: "1px solid transparent",
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.background = "#fff";
+              e.currentTarget.style.borderColor = "rgba(0,122,255,0.3)";
+              e.currentTarget.style.boxShadow = "var(--shadow-sm)";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.background = "var(--fill-primary)";
+              e.currentTarget.style.borderColor = "transparent";
+              e.currentTarget.style.boxShadow = "none";
+            }}
+          />
+        </div>
         <select
           name="sort"
           defaultValue={sort}
-          className="border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="text-sm px-3 py-2 rounded-xl focus:outline-none transition-all"
+          style={{
+            background: "var(--fill-primary)",
+            color: "var(--text-primary)",
+            border: "1px solid transparent",
+          }}
         >
           <option value="">Sort: Name</option>
           <option value="arr">Sort: ARR ↑</option>
@@ -154,30 +222,37 @@ export default async function CrmPage({
         </select>
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-700"
+          className="px-4 py-2 rounded-xl text-sm font-medium text-white transition-all hover:opacity-90"
+          style={{ background: "var(--accent-blue)" }}
         >
           Apply
         </button>
       </form>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: "#fff",
+          boxShadow: "var(--shadow-sm)",
+          border: "1px solid var(--separator)",
+        }}
+      >
         <table className="w-full text-sm text-left">
-          <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-            <tr>
-              <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">ARR</th>
-              <th className="px-4 py-3">Employees</th>
-              <th className="px-4 py-3">Industry</th>
-              <th className="px-4 py-3">HRIS</th>
-              <th className="px-4 py-3">Impl Fee</th>
-              <th className="px-4 py-3">Gross Margin</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Modules</th>
-              <th className="px-4 py-3"></th>
+          <thead>
+            <tr style={{ background: "var(--bg-tertiary)", borderBottom: "1px solid var(--separator)" }}>
+              {["Customer", "ARR", "Employees", "Industry", "HRIS", "Impl Fee", "Gross Margin", "Status", "Modules", ""].map((h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 font-semibold uppercase tracking-wide"
+                  style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                >
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 bg-white">
+          <tbody>
             {rows.map((r) => {
               const rev = Number(r.arr) + Number(r.impl_fee);
               const margin =
@@ -185,21 +260,48 @@ export default async function CrmPage({
                   ? (((rev - Number(r.impl_fee) * 0.6) / rev) * 100).toFixed(1)
                   : "—";
               return (
-                <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-medium text-gray-900">{r.customer_name}</td>
-                  <td className="px-4 py-3 text-gray-700">{fmt(Number(r.arr))}</td>
-                  <td className="px-4 py-3 text-gray-700">{r.employees.toLocaleString()}</td>
-                  <td className="px-4 py-3 text-gray-700">{r.industry}</td>
-                  <td className="px-4 py-3 text-gray-500">{r.hris_platform ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{fmt(Number(r.impl_fee))}</td>
-                  <td className="px-4 py-3 text-gray-700">{margin}%</td>
+                <tr
+                  key={r.id}
+                  className="transition-colors"
+                  style={{ borderBottom: "1px solid var(--separator)" }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.background = "var(--fill-secondary)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.background = "transparent")
+                  }
+                >
+                  <td
+                    className="px-4 py-3 font-medium"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {r.customer_name}
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
+                    {fmt(Number(r.arr))}
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
+                    {r.employees.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--text-secondary)" }}>
+                    {r.industry}
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--text-secondary)" }}>
+                    {r.hris_platform ?? "—"}
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
+                    {fmt(Number(r.impl_fee))}
+                  </td>
+                  <td className="px-4 py-3" style={{ color: "var(--text-primary)" }}>
+                    {margin}%
+                  </td>
                   <td className="px-4 py-3">{statusBadge(r.status)}</td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap gap-1">
                       {r.account_modules.map((m) => (
                         <span
                           key={m.module_name}
-                          className="bg-blue-50 text-blue-700 text-xs px-1.5 py-0.5 rounded"
+                          className="bg-blue-50 text-blue-700 text-xs rounded-full px-2 py-0.5"
                         >
                           {m.module_name}
                         </span>
@@ -209,7 +311,8 @@ export default async function CrmPage({
                   <td className="px-4 py-3">
                     <Link
                       href={`/crm/${r.id}`}
-                      className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                      className="text-xs font-medium hover:underline"
+                      style={{ color: "var(--accent-blue)" }}
                     >
                       View →
                     </Link>
@@ -220,7 +323,12 @@ export default async function CrmPage({
           </tbody>
         </table>
         {rows.length === 0 && (
-          <p className="text-center py-10 text-gray-400 text-sm">No accounts found.</p>
+          <p
+            className="text-center py-10 text-sm"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            No accounts found.
+          </p>
         )}
       </div>
     </div>

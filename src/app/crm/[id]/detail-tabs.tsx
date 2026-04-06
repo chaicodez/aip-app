@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { ProServChart, ProfitabilityChart } from "./charts";
 
-const HR = 185; // $/hr — matches prototype
+const HR = 185;
 
-// ─── Small helpers ────────────────────────────────────────────────────────────
 function fmt(n: number) {
   if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
   if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`;
@@ -27,44 +26,63 @@ function StatCard({
   accent?: "blue" | "green" | "amber" | "red" | "purple";
 }) {
   const colors = {
-    blue: "#378ADD",
-    green: "#1D9E75",
-    amber: "#BA7517",
-    red: "#E24B4A",
-    purple: "#7F77DD",
+    blue:   "#007AFF",
+    green:  "#34C759",
+    amber:  "#FF9500",
+    red:    "#FF3B30",
+    purple: "#AF52DE",
   };
-  const border = accent ? colors[accent] : "#e5e5e4";
+  const borderColor = accent ? colors[accent] : "var(--separator)";
   return (
     <div
-      className="bg-white border border-gray-200 rounded-xl p-3"
-      style={{ borderLeft: `3px solid ${border}` }}
+      className="bg-white rounded-2xl p-4"
+      style={{
+        border: "1px solid var(--separator)",
+        borderLeftWidth: "3px",
+        borderLeftColor: borderColor,
+        boxShadow: "var(--shadow-sm)",
+      }}
     >
-      <p className="text-xs text-gray-500 mb-0.5">{label}</p>
-      <p className="text-lg font-semibold text-gray-900">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+      <p
+        className="mb-0.5"
+        style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+      >
+        {label}
+      </p>
+      <p
+        className="font-semibold"
+        style={{ fontSize: "17px", color: "var(--text-primary)" }}
+      >
+        {value}
+      </p>
+      {sub && (
+        <p className="mt-0.5" style={{ fontSize: "11px", color: "var(--text-secondary)" }}>
+          {sub}
+        </p>
+      )}
     </div>
   );
 }
 
 function Badge({ text }: { text: string }) {
   const map: Record<string, string> = {
-    Active: "bg-green-100 text-green-800",
-    "At Risk": "bg-yellow-100 text-yellow-800",
-    Churned: "bg-red-100 text-red-800",
-    "Closed Won": "bg-green-100 text-green-800",
-    Negotiation: "bg-blue-100 text-blue-800",
-    Proposal: "bg-purple-100 text-purple-800",
-    Discovery: "bg-yellow-100 text-yellow-800",
-    High: "bg-red-100 text-red-800",
-    Medium: "bg-yellow-100 text-yellow-800",
-    Low: "bg-gray-100 text-gray-600",
-    Closed: "bg-green-100 text-green-800",
-    "In Progress": "bg-blue-100 text-blue-800",
-    Open: "bg-yellow-100 text-yellow-800",
+    Active:       "bg-green-50 text-green-700 border border-green-200",
+    "At Risk":    "bg-red-50 text-red-700 border border-red-200",
+    Churned:      "bg-gray-100 text-gray-600 border border-gray-200",
+    "Closed Won": "bg-green-50 text-green-700 border border-green-200",
+    Negotiation:  "bg-blue-50 text-blue-700 border border-blue-200",
+    Proposal:     "bg-purple-50 text-purple-700 border border-purple-200",
+    Discovery:    "bg-amber-50 text-amber-700 border border-amber-200",
+    High:         "bg-red-50 text-red-700 border border-red-200",
+    Medium:       "bg-amber-50 text-amber-700 border border-amber-200",
+    Low:          "bg-gray-100 text-gray-600 border border-gray-200",
+    Closed:       "bg-green-50 text-green-700 border border-green-200",
+    "In Progress":"bg-blue-50 text-blue-700 border border-blue-200",
+    Open:         "bg-amber-50 text-amber-700 border border-amber-200",
   };
-  const cls = map[text] ?? "bg-gray-100 text-gray-600";
+  const cls = map[text] ?? "bg-gray-100 text-gray-600 border border-gray-200";
   return (
-    <span className={`inline-block text-xs px-1.5 py-0.5 rounded-md font-medium ${cls}`}>
+    <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-medium ${cls}`}>
       {text}
     </span>
   );
@@ -81,16 +99,18 @@ function ProgressBar({
 }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0;
   return (
-    <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+    <div
+      className="flex-1 h-2 rounded-full overflow-hidden"
+      style={{ background: "var(--fill-primary)" }}
+    >
       <div
-        className="h-2.5 rounded-full"
+        className="h-2 rounded-full"
         style={{ width: `${pct}%`, background: color }}
       />
     </div>
   );
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
 type ModuleName = string;
 
 interface Account {
@@ -150,7 +170,28 @@ interface Props {
   rdTickets: RdTicket[];
 }
 
-// ─── Tab panels ──────────────────────────────────────────────────────────────
+function Card({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="bg-white rounded-2xl p-4"
+      style={{ border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CardTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <p
+      className="font-semibold mb-3"
+      style={{ fontSize: "13px", color: "var(--text-primary)" }}
+    >
+      {children}
+    </p>
+  );
+}
+
 function OverviewTab({ account, modules, proserv, rdTickets }: Omit<Props, "opportunities">) {
   const arr = Number(account.arr);
   const implFee = Number(account.impl_fee);
@@ -160,7 +201,7 @@ function OverviewTab({ account, modules, proserv, rdTickets }: Omit<Props, "oppo
   const rev = arr + implFee;
   const net = rev - proservCost - rdCost;
   const margin = rev > 0 ? (net / rev) * 100 : 0;
-  const marginColor = margin >= 30 ? "#16a34a" : margin >= 0 ? "#d97706" : "#dc2626";
+  const marginColor = margin >= 30 ? "#34C759" : margin >= 0 ? "#FF9500" : "#FF3B30";
   const ttv = proserv?.time_to_value_days ?? 0;
 
   const details = [
@@ -175,15 +216,15 @@ function OverviewTab({ account, modules, proserv, rdTickets }: Omit<Props, "oppo
   ];
 
   const bars = [
-    { label: "ARR", value: arr, color: "#7F77DD" },
-    { label: "Impl revenue", value: implFee, color: "#AFA9EC" },
-    { label: "ProServ cost", value: proservCost, color: "#BA7517" },
-    { label: "R&D cost", value: rdCost, color: "#E24B4A" },
+    { label: "ARR", value: arr, color: "#007AFF" },
+    { label: "Impl revenue", value: implFee, color: "#5AC8FA" },
+    { label: "ProServ cost", value: proservCost, color: "#FF9500" },
+    { label: "R&D cost", value: rdCost, color: "#FF3B30" },
   ];
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="ARR" value={fmt(arr)} sub={`${account.contract_term_months}mo term`} accent="blue" />
         <StatCard label="Employees" value={account.employees.toLocaleString()} sub={account.industry} accent="purple" />
         <StatCard
@@ -201,45 +242,60 @@ function OverviewTab({ account, modules, proserv, rdTickets }: Omit<Props, "oppo
       </div>
 
       <div className="grid md:grid-cols-2 gap-3">
-        {/* Account details */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-900 mb-3">Account details</p>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+        <Card>
+          <CardTitle>Account details</CardTitle>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
             {details.map(([k, v]) => (
               <div key={k}>
-                <p className="text-xs text-gray-400">{k}</p>
-                <p className="text-sm font-medium text-gray-900">{v}</p>
+                <p style={{ fontSize: "11px", color: "var(--text-secondary)" }}>{k}</p>
+                <p className="text-sm font-medium mt-0.5" style={{ color: "var(--text-primary)" }}>{v}</p>
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap gap-1 mt-3">
+          <div className="flex flex-wrap gap-1.5 mt-3">
             {modules.map((m) => (
-              <span key={m} className="bg-purple-50 text-purple-700 text-xs px-1.5 py-0.5 rounded-md font-medium">
+              <span
+                key={m}
+                className="text-xs px-2 py-0.5 rounded-full font-medium"
+                style={{ background: "rgba(175,82,222,0.1)", color: "#AF52DE" }}
+              >
                 {m}
               </span>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Cost vs revenue */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-900 mb-3">Cost vs revenue</p>
-          <div className="space-y-2">
+        <Card>
+          <CardTitle>Cost vs revenue</CardTitle>
+          <div className="space-y-2.5">
             {bars.map((b) => (
               <div key={b.label} className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 w-24 shrink-0">{b.label}</span>
+                <span
+                  className="w-24 shrink-0"
+                  style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                >
+                  {b.label}
+                </span>
                 <ProgressBar value={b.value} max={rev} color={b.color} />
-                <span className="text-xs font-medium w-14 text-right">{fmt(b.value)}</span>
+                <span
+                  className="text-xs font-medium w-14 text-right"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {fmt(b.value)}
+                </span>
               </div>
             ))}
           </div>
-          <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between text-xs">
-            <span className="text-gray-500">Net profit</span>
+          <div
+            className="mt-3 pt-3 flex justify-between text-xs"
+            style={{ borderTop: "1px solid var(--separator)" }}
+          >
+            <span style={{ color: "var(--text-secondary)" }}>Net profit</span>
             <span className="font-semibold" style={{ color: marginColor }}>
               {fmtD(net)}
             </span>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
@@ -248,18 +304,25 @@ function OverviewTab({ account, modules, proserv, rdTickets }: Omit<Props, "oppo
 function OpportunitiesTab({ opportunities }: { opportunities: Opportunity[] }) {
   const total = opportunities.reduce((s, o) => s + Number(o.value), 0);
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-100">
-        <span className="text-xs font-medium text-gray-900">
+    <Card>
+      <div
+        className="px-0 pb-3 mb-3"
+        style={{ borderBottom: "1px solid var(--separator)" }}
+      >
+        <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
           Opportunities ({opportunities.length}) · pipeline {fmt(total)}
         </span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-100">
+            <tr style={{ borderBottom: "1px solid var(--separator)" }}>
               {["ID", "Name", "Stage", "Value", "Close date", "Age"].map((h) => (
-                <th key={h} className="text-xs text-gray-400 font-medium px-4 py-2 text-left whitespace-nowrap">
+                <th
+                  key={h}
+                  className="pb-2 text-left whitespace-nowrap font-semibold uppercase tracking-wide"
+                  style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                >
                   {h}
                 </th>
               ))}
@@ -268,15 +331,21 @@ function OpportunitiesTab({ opportunities }: { opportunities: Opportunity[] }) {
           <tbody>
             {opportunities.map((o) => {
               const age = o.age_days;
-              const ageColor = age > 60 ? "#dc2626" : age > 30 ? "#d97706" : "#16a34a";
+              const ageColor = age > 60 ? "#FF3B30" : age > 30 ? "#FF9500" : "#34C759";
               return (
-                <tr key={o.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-mono text-xs text-gray-400">{o.id}</td>
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{o.name}</td>
-                  <td className="px-4 py-2.5"><Badge text={o.stage} /></td>
-                  <td className="px-4 py-2.5 font-semibold text-purple-700">{fmtD(Number(o.value))}</td>
-                  <td className="px-4 py-2.5 text-gray-400 text-xs">{o.close_date ?? "—"}</td>
-                  <td className="px-4 py-2.5">
+                <tr
+                  key={o.id}
+                  className="transition-colors"
+                  style={{ borderBottom: "1px solid var(--separator)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--fill-secondary)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <td className="py-2.5 pr-4 font-mono text-xs" style={{ color: "var(--text-secondary)" }}>{o.id}</td>
+                  <td className="py-2.5 pr-4 font-medium" style={{ color: "var(--text-primary)" }}>{o.name}</td>
+                  <td className="py-2.5 pr-4"><Badge text={o.stage} /></td>
+                  <td className="py-2.5 pr-4 font-semibold" style={{ color: "#AF52DE" }}>{fmtD(Number(o.value))}</td>
+                  <td className="py-2.5 pr-4 text-xs" style={{ color: "var(--text-secondary)" }}>{o.close_date ?? "—"}</td>
+                  <td className="py-2.5">
                     <span className="font-semibold text-xs" style={{ color: ageColor }}>
                       {age}d
                     </span>
@@ -287,21 +356,21 @@ function OpportunitiesTab({ opportunities }: { opportunities: Opportunity[] }) {
           </tbody>
         </table>
       </div>
-    </div>
+    </Card>
   );
 }
 
 function ProServTab({ proserv }: { proserv: ProServ | null }) {
   if (!proserv) {
-    return <p className="text-sm text-gray-400">No ProServ engagement on file.</p>;
+    return <p className="text-sm" style={{ color: "var(--text-secondary)" }}>No ProServ engagement on file.</p>;
   }
   const { total_hours, billed_hours, remaining_hours, impl_hours, support_hours, time_to_value_days, resources } = proserv;
   const implPct = total_hours > 0 ? Math.round((impl_hours / total_hours) * 100) : 0;
-  const supPct = total_hours > 0 ? Math.round((support_hours / total_hours) * 100) : 0;
+  const supPct  = total_hours > 0 ? Math.round((support_hours / total_hours) * 100) : 0;
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Total PS hours" value={`${total_hours}h`} sub="Contracted" accent="blue" />
         <StatCard
           label="Hours consumed"
@@ -309,12 +378,7 @@ function ProServTab({ proserv }: { proserv: ProServ | null }) {
           sub={remaining_hours >= 0 ? `${remaining_hours}h remaining` : `${Math.abs(remaining_hours)}h over budget`}
           accent={remaining_hours >= 0 ? "green" : "red"}
         />
-        <StatCard
-          label="Impl / support"
-          value={`${implPct}% / ${supPct}%`}
-          sub={`${impl_hours}h impl`}
-          accent="purple"
-        />
+        <StatCard label="Impl / support" value={`${implPct}% / ${supPct}%`} sub={`${impl_hours}h impl`} accent="purple" />
         <StatCard
           label="Time to value"
           value={`${time_to_value_days} days`}
@@ -324,90 +388,110 @@ function ProServTab({ proserv }: { proserv: ProServ | null }) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-3">
-        {/* Resources table */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100">
-            <p className="text-xs font-medium text-gray-900">Resources assigned</p>
-          </div>
+        <Card>
+          <CardTitle>Resources assigned</CardTitle>
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
+              <tr style={{ borderBottom: "1px solid var(--separator)" }}>
                 {["Name", "Role", "Hours", "Cost"].map((h) => (
-                  <th key={h} className="text-xs text-gray-400 font-medium px-4 py-2 text-left">{h}</th>
+                  <th
+                    key={h}
+                    className="pb-2 text-left font-semibold uppercase tracking-wide"
+                    style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {resources.map((r) => (
-                <tr key={r.name} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{r.name}</td>
-                  <td className="px-4 py-2.5 text-gray-400 text-xs">{r.role}</td>
-                  <td className="px-4 py-2.5 text-gray-700">{r.hours}h</td>
-                  <td className="px-4 py-2.5 font-semibold text-amber-600">{fmtD(r.hours * HR)}</td>
+                <tr
+                  key={r.name}
+                  className="transition-colors"
+                  style={{ borderBottom: "1px solid var(--separator)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--fill-secondary)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <td className="py-2.5 font-medium" style={{ color: "var(--text-primary)" }}>{r.name}</td>
+                  <td className="py-2.5 text-xs" style={{ color: "var(--text-secondary)" }}>{r.role}</td>
+                  <td className="py-2.5" style={{ color: "var(--text-primary)" }}>{r.hours}h</td>
+                  <td className="py-2.5 font-semibold" style={{ color: "#FF9500" }}>{fmtD(r.hours * HR)}</td>
                 </tr>
               ))}
-              <tr className="bg-gray-50">
-                <td colSpan={2} className="px-4 py-2.5 font-semibold text-xs text-gray-700">Total</td>
-                <td className="px-4 py-2.5 font-semibold text-gray-700">{total_hours}h</td>
-                <td className="px-4 py-2.5 font-semibold text-amber-600">{fmtD(total_hours * HR)}</td>
+              <tr style={{ background: "var(--fill-primary)" }}>
+                <td colSpan={2} className="py-2 font-semibold text-xs" style={{ color: "var(--text-primary)" }}>Total</td>
+                <td className="py-2 font-semibold" style={{ color: "var(--text-primary)" }}>{total_hours}h</td>
+                <td className="py-2 font-semibold" style={{ color: "#FF9500" }}>{fmtD(total_hours * HR)}</td>
               </tr>
             </tbody>
           </table>
-        </div>
+        </Card>
 
-        {/* Bar chart */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-900 mb-3">Hours by resource</p>
+        <Card>
+          <CardTitle>Hours by resource</CardTitle>
           <ProServChart resources={resources} />
-        </div>
+        </Card>
       </div>
     </div>
   );
 }
 
 function RdTab({ rdTickets }: { rdTickets: RdTicket[] }) {
-  const totalHours = rdTickets.reduce((s, t) => s + t.hours, 0);
+  const totalHours  = rdTickets.reduce((s, t) => s + t.hours, 0);
   const activeCount = rdTickets.filter((t) => t.status !== "Closed").length;
-  const avgHrs = rdTickets.length > 0 ? (totalHours / rdTickets.length).toFixed(1) : "0";
+  const avgHrs      = rdTickets.length > 0 ? (totalHours / rdTickets.length).toFixed(1) : "0";
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-3">
         <StatCard label="Total tickets" value={String(rdTickets.length)} sub={`${activeCount} active`} accent="purple" />
         <StatCard label="Total R&D hours" value={`${totalHours}h`} sub={`${fmtD(totalHours * HR)} cost`} accent="red" />
         <StatCard label="Avg hrs / ticket" value={`${avgHrs}h`} sub="per ticket" accent="amber" />
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-100">
+              <tr style={{ borderBottom: "1px solid var(--separator)" }}>
                 {["Ticket", "Title", "Status", "Priority", "Hours", "Cost"].map((h) => (
-                  <th key={h} className="text-xs text-gray-400 font-medium px-4 py-2.5 text-left whitespace-nowrap">{h}</th>
+                  <th
+                    key={h}
+                    className="pb-2.5 text-left font-semibold uppercase tracking-wide whitespace-nowrap"
+                    style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                  >
+                    {h}
+                  </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {rdTickets.map((t) => (
-                <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
-                  <td className="px-4 py-2.5 font-mono text-xs text-gray-400">{t.id}</td>
-                  <td className="px-4 py-2.5 font-medium text-gray-900">{t.title}</td>
-                  <td className="px-4 py-2.5"><Badge text={t.status} /></td>
-                  <td className="px-4 py-2.5"><Badge text={t.priority} /></td>
-                  <td className="px-4 py-2.5 text-gray-700">{t.hours}h</td>
-                  <td className="px-4 py-2.5 font-semibold text-red-600">{fmtD(t.hours * HR)}</td>
+                <tr
+                  key={t.id}
+                  className="transition-colors"
+                  style={{ borderBottom: "1px solid var(--separator)" }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--fill-secondary)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  <td className="py-2.5 pr-4 font-mono text-xs" style={{ color: "var(--text-secondary)" }}>{t.id}</td>
+                  <td className="py-2.5 pr-4 font-medium" style={{ color: "var(--text-primary)" }}>{t.title}</td>
+                  <td className="py-2.5 pr-4"><Badge text={t.status} /></td>
+                  <td className="py-2.5 pr-4"><Badge text={t.priority} /></td>
+                  <td className="py-2.5 pr-4" style={{ color: "var(--text-primary)" }}>{t.hours}h</td>
+                  <td className="py-2.5 font-semibold" style={{ color: "#FF3B30" }}>{fmtD(t.hours * HR)}</td>
                 </tr>
               ))}
-              <tr className="bg-gray-50">
-                <td colSpan={4} className="px-4 py-2.5 font-semibold text-xs text-gray-700">Total</td>
-                <td className="px-4 py-2.5 font-semibold text-gray-700">{totalHours}h</td>
-                <td className="px-4 py-2.5 font-semibold text-red-600">{fmtD(totalHours * HR)}</td>
+              <tr style={{ background: "var(--fill-primary)" }}>
+                <td colSpan={4} className="py-2 font-semibold text-xs" style={{ color: "var(--text-primary)" }}>Total</td>
+                <td className="py-2 font-semibold" style={{ color: "var(--text-primary)" }}>{totalHours}h</td>
+                <td className="py-2 font-semibold" style={{ color: "#FF3B30" }}>{fmtD(totalHours * HR)}</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }
@@ -421,29 +505,29 @@ function ProfitabilityTab({
   proserv: ProServ | null;
   rdTickets: RdTicket[];
 }) {
-  const arr = Number(account.arr);
-  const implFee = Number(account.impl_fee);
-  const proservCost = proserv ? proserv.total_hours * HR : 0;
-  const rdHours = rdTickets.reduce((s, t) => s + t.hours, 0);
-  const rdCost = rdHours * HR;
-  const rev = arr + implFee;
-  const totalCost = proservCost + rdCost;
-  const net = rev - totalCost;
-  const margin = rev > 0 ? (net / rev) * 100 : 0;
-  const marginColor = margin >= 40 ? "green" : margin >= 20 ? "amber" : "red";
-  const marginLabel = margin >= 40 ? "Healthy" : margin >= 20 ? "Watch" : "At risk";
+  const arr          = Number(account.arr);
+  const implFee      = Number(account.impl_fee);
+  const proservCost  = proserv ? proserv.total_hours * HR : 0;
+  const rdHours      = rdTickets.reduce((s, t) => s + t.hours, 0);
+  const rdCost       = rdHours * HR;
+  const rev          = arr + implFee;
+  const totalCost    = proservCost + rdCost;
+  const net          = rev - totalCost;
+  const margin       = rev > 0 ? (net / rev) * 100 : 0;
+  const marginColor  = margin >= 40 ? "green" : margin >= 20 ? "amber" : "red";
+  const marginLabel  = margin >= 40 ? "Healthy" : margin >= 20 ? "Watch" : "At risk";
 
   const waterfall = [
-    { label: "ARR", value: arr, color: "#7F77DD", sign: "+" },
-    { label: "Impl fee", value: implFee, color: "#AFA9EC", sign: "+" },
-    { label: "ProServ cost", value: proservCost, color: "#BA7517", sign: "−" },
-    { label: "R&D cost", value: rdCost, color: "#E24B4A", sign: "−" },
-    { label: "Net profit", value: Math.abs(net), color: net >= 0 ? "#1D9E75" : "#E24B4A", sign: "=" },
+    { label: "ARR",         value: arr,          color: "#007AFF",  sign: "+" },
+    { label: "Impl fee",    value: implFee,       color: "#5AC8FA",  sign: "+" },
+    { label: "ProServ cost",value: proservCost,   color: "#FF9500",  sign: "−" },
+    { label: "R&D cost",    value: rdCost,        color: "#FF3B30",  sign: "−" },
+    { label: "Net profit",  value: Math.abs(net), color: net >= 0 ? "#34C759" : "#FF3B30", sign: "=" },
   ];
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <StatCard label="Total revenue" value={fmtD(rev)} sub="ARR + impl" accent="blue" />
         <StatCard label="Total cost" value={fmtD(totalCost)} sub="ProServ + R&D" accent="red" />
         <StatCard label="Net profit" value={fmtD(net)} accent={net >= 0 ? "green" : "red"} />
@@ -456,37 +540,49 @@ function ProfitabilityTab({
       </div>
 
       <div className="grid md:grid-cols-2 gap-3">
-        {/* Stacked bar chart */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-900 mb-2">Revenue vs cost</p>
+        <Card>
+          <CardTitle>Revenue vs cost</CardTitle>
           <ProfitabilityChart
             arr={arr}
             implFee={implFee}
             proservCost={proservCost}
             rdCost={rdCost}
           />
-        </div>
+        </Card>
 
-        {/* Waterfall */}
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
-          <p className="text-xs font-medium text-gray-900 mb-3">Profitability waterfall</p>
-          <div className="space-y-2">
+        <Card>
+          <CardTitle>Profitability waterfall</CardTitle>
+          <div className="space-y-2.5">
             {waterfall.map((row) => (
               <div key={row.label} className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 font-medium w-3 shrink-0">{row.sign}</span>
-                <span className="text-xs text-gray-400 w-24 shrink-0">{row.label}</span>
+                <span
+                  className="font-medium w-3 shrink-0"
+                  style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                >
+                  {row.sign}
+                </span>
+                <span
+                  className="w-24 shrink-0"
+                  style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                >
+                  {row.label}
+                </span>
                 <ProgressBar value={row.value} max={rev} color={row.color} />
-                <span className="text-xs font-semibold w-16 text-right">{fmt(row.value)}</span>
+                <span
+                  className="text-xs font-semibold w-16 text-right"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {fmt(row.value)}
+                </span>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
 }
 
-// ─── Main exported component ──────────────────────────────────────────────────
 const TABS = ["Overview", "Opportunities", "ProServ", "R&D Tickets", "Profitability"] as const;
 type Tab = (typeof TABS)[number];
 
@@ -495,24 +591,32 @@ export function DetailTabs(props: Props) {
 
   return (
     <div>
-      {/* Tab bar */}
-      <div className="flex gap-1.5 flex-wrap mb-4">
+      {/* Pill-style tab bar */}
+      <div
+        className="inline-flex gap-0.5 rounded-full p-1 mb-5"
+        style={{ background: "var(--fill-primary)" }}
+      >
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => setActive(t)}
-            className={`text-xs px-3.5 py-1.5 rounded-full border transition-colors ${
+            className="text-xs px-3.5 py-1.5 rounded-full font-medium transition-all"
+            style={
               active === t
-                ? "bg-gray-900 text-white border-gray-900 font-medium"
-                : "bg-transparent text-gray-500 border-gray-200 hover:bg-gray-100"
-            }`}
+                ? {
+                    background: "#fff",
+                    color: "var(--text-primary)",
+                    boxShadow: "var(--shadow-sm)",
+                    fontWeight: 600,
+                  }
+                : { color: "var(--text-secondary)" }
+            }
           >
             {t}
           </button>
         ))}
       </div>
 
-      {/* Tab content */}
       {active === "Overview" && (
         <OverviewTab
           account={props.account}

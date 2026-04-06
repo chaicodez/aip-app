@@ -25,15 +25,24 @@ function relativeTime(iso: string | null): string {
 }
 
 function StatusDot({ status }: { status: Vendor["status"] }) {
-  const cls = status === "healthy" ? "bg-green-500"
-            : status === "warning" ? "bg-amber-400"
-            : "bg-gray-300";
-  return <span className={`inline-block w-2 h-2 rounded-full ${cls}`} />;
+  const bg =
+    status === "healthy" ? "#34C759"
+    : status === "warning" ? "#FF9500"
+    : "rgba(60,60,67,0.3)";
+  return (
+    <span
+      className="inline-block w-2 h-2 rounded-full shrink-0"
+      style={{ background: bg }}
+    />
+  );
 }
 
 function VendorIcon({ icon, name }: { icon: string | null; name: string }) {
   return (
-    <div className="w-10 h-10 rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
+    <div
+      className="w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+      style={{ background: "var(--fill-primary)", color: "var(--text-primary)" }}
+    >
       {icon ?? name.slice(0, 2).toUpperCase()}
     </div>
   );
@@ -50,19 +59,28 @@ export default async function SettingsPage() {
   const warnings = all.filter((v) => v.status === "warning").length;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto" style={{ background: "var(--bg-primary)" }}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-base font-semibold text-gray-900">Data Sources</h1>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <h1 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
+            Data Sources
+          </h1>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
             {healthy} healthy · {warnings} warning · {all.length} total integrations
           </p>
         </div>
         {/* Admin link — visible in dev; production would gate on role */}
         <Link
           href="/settings/admin"
-          className="flex items-center gap-1.5 text-xs text-gray-500 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-xl transition-all"
+          style={{ color: "var(--text-secondary)", border: "1px solid var(--separator)" }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.background = "var(--fill-primary)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLAnchorElement).style.background = "";
+          }}
         >
           <span>⚙</span> Admin console
         </Link>
@@ -77,7 +95,8 @@ export default async function SettingsPage() {
           return (
             <div
               key={vendor.id}
-              className="bg-white border border-gray-200 rounded-xl p-4"
+              className="bg-white rounded-2xl p-4 transition-all card-hover"
+              style={{ border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
             >
               <div className="flex items-start gap-3">
                 <VendorIcon icon={vendor.icon} name={vendor.name} />
@@ -85,42 +104,59 @@ export default async function SettingsPage() {
                 <div className="flex-1 min-w-0">
                   {/* Name + status */}
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className="text-sm font-semibold text-gray-900">{vendor.name}</span>
+                    <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {vendor.name}
+                    </span>
                     <StatusDot status={vendor.status} />
-                    <span className="text-xs text-gray-400 capitalize">{vendor.status}</span>
+                    <span className="capitalize" style={{ color: "var(--text-secondary)", fontSize: "12px" }}>
+                      {vendor.status}
+                    </span>
                     {vendor.error_count > 0 && (
-                      <span className="ml-auto inline-flex items-center gap-1 bg-red-100 text-red-700 text-xs font-medium px-1.5 py-0.5 rounded-md">
+                      <span
+                        className="ml-auto inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(255,59,48,0.1)", color: "#FF3B30" }}
+                      >
                         {vendor.error_count} error{vendor.error_count !== 1 ? "s" : ""}
                       </span>
                     )}
                   </div>
 
                   {/* Type */}
-                  <p className="text-xs text-gray-400 mb-2">{vendor.type}</p>
+                  <p className="text-xs mt-0.5 mb-2" style={{ color: "var(--text-secondary)" }}>
+                    {vendor.type}
+                  </p>
 
                   {isJira && !isConnected ? (
                     /* Jira not connected */
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-400">Not connected</span>
+                      <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>Not connected</span>
                       <div>
                         <button
                           disabled
                           title="OAuth setup required — configure credentials in Admin Console first"
-                          className="px-3 py-1.5 text-sm rounded-md bg-gray-100 text-gray-400 cursor-not-allowed"
+                          className="px-3 py-1.5 text-sm rounded-xl cursor-not-allowed"
+                          style={{ background: "var(--fill-primary)", color: "var(--text-secondary)" }}
                         >
                           Connect
                         </button>
-                        <p className="text-xs text-gray-400 mt-1">OAuth setup required — see Admin Console</p>
+                        <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                          OAuth setup required — see Admin Console
+                        </p>
                       </div>
                     </div>
                   ) : (
                     /* Connected vendor stats + sync button */
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex gap-4 text-xs text-gray-500">
-                        <span>
-                          <span className="font-medium text-gray-700">{vendor.record_count.toLocaleString()}</span> records
+                      <div className="flex gap-4 text-xs">
+                        <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>
+                          <span className="font-medium" style={{ color: "var(--text-primary)" }}>
+                            {vendor.record_count.toLocaleString()}
+                          </span>{" "}
+                          records
                         </span>
-                        <span>Last sync: {relativeTime(vendor.last_sync_at)}</span>
+                        <span style={{ color: "var(--text-secondary)", fontSize: "12px" }}>
+                          Last sync: {relativeTime(vendor.last_sync_at)}
+                        </span>
                       </div>
                       <SyncButton vendorId={vendor.id} />
                     </div>
@@ -133,9 +169,13 @@ export default async function SettingsPage() {
       </div>
 
       {/* Footer note */}
-      <p className="text-xs text-gray-400 mt-6 text-center">
+      <p className="text-xs mt-6 text-center" style={{ color: "var(--text-secondary)" }}>
         Sync schedules and field mappings are managed in the{" "}
-        <Link href="/settings/admin" className="text-gray-600 underline underline-offset-2">
+        <Link
+          href="/settings/admin"
+          className="underline underline-offset-2"
+          style={{ color: "var(--text-primary)" }}
+        >
           Admin console
         </Link>
         .

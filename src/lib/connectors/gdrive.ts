@@ -11,8 +11,11 @@
   9. Add ANTHROPIC_API_KEY to .env.local and Vercel
 */
 
+// Secrets loaded from environment — never hardcode here
+// Required Vercel env vars: SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY
 import { createCipheriv, createSign } from "crypto";
 import { getServiceClient } from "@/lib/supabase/service";
+import { env } from "@/lib/env";
 
 // suppress unused-import lint for crypto (used via string refs at runtime)
 void createCipheriv;
@@ -31,7 +34,7 @@ function base64UrlEncode(input: Buffer | string): string {
 }
 
 async function getAccessToken(): Promise<string> {
-  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  const raw = env.googleServiceAccount;
   if (!raw) throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not set");
 
   const sa = JSON.parse(raw) as {
@@ -180,7 +183,7 @@ export async function syncFolder(folderId: string): Promise<{
     try {
       const base64 = await downloadFileAsBase64(file.id, token);
 
-      const anthropicKey = process.env.ANTHROPIC_API_KEY;
+      const anthropicKey = env.anthropicApiKey;
       if (!anthropicKey) throw new Error("ANTHROPIC_API_KEY is not set");
 
       const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {

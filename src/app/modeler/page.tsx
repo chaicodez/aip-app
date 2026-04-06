@@ -69,12 +69,19 @@ function StatCard({
   label: string; value: string; sub?: string; accent?: "blue" | "green" | "purple" | "amber";
 }) {
   const borders = { blue: "#378ADD", green: "#1D9E75", purple: "#7F77DD", amber: "#BA7517" };
-  const border = accent ? borders[accent] : "#e5e5e4";
+  const border = accent ? borders[accent] : "var(--separator)";
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-3" style={{ borderLeft: `3px solid ${border}` }}>
-      <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-      <p className="text-lg font-semibold text-gray-900">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+    <div
+      className="bg-white rounded-2xl p-4 card-hover"
+      style={{
+        border: "1px solid var(--separator)",
+        borderLeft: `3px solid ${border}`,
+        boxShadow: "var(--shadow-sm)",
+      }}
+    >
+      <p style={{ fontSize: 11, color: "var(--text-secondary)", marginBottom: 2 }}>{label}</p>
+      <p style={{ fontSize: 17, fontWeight: 600, color: "var(--text-primary)" }}>{value}</p>
+      {sub && <p style={{ fontSize: 11, color: "var(--text-secondary)", marginTop: 2 }}>{sub}</p>}
     </div>
   );
 }
@@ -82,14 +89,21 @@ function StatCard({
 function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
   return (
-    <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+    <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: "var(--fill-primary)" }}>
       <div className="h-2.5 rounded-full" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
 }
 
 function InputLabel({ children }: { children: React.ReactNode }) {
-  return <label className="block text-xs font-medium text-gray-500 mb-1">{children}</label>;
+  return (
+    <label
+      className="block mb-1"
+      style={{ fontSize: 11, fontWeight: 500, color: "var(--text-secondary)" }}
+    >
+      {children}
+    </label>
+  );
 }
 
 function TextInput({
@@ -104,7 +118,22 @@ function TextInput({
       placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full text-sm px-2.5 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+      className="w-full text-sm rounded-xl px-3 py-2 focus:outline-none transition-all"
+      style={{
+        background: "var(--fill-primary)",
+        border: "1px solid transparent",
+        color: "var(--text-primary)",
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.background = "#FFFFFF";
+        e.currentTarget.style.border = "1px solid rgba(0,122,255,0.4)";
+        e.currentTarget.style.boxShadow = "var(--shadow-sm)";
+      }}
+      onBlur={(e) => {
+        e.currentTarget.style.background = "var(--fill-primary)";
+        e.currentTarget.style.border = "1px solid transparent";
+        e.currentTarget.style.boxShadow = "none";
+      }}
     />
   );
 }
@@ -292,54 +321,77 @@ export default function ModelerPage() {
   // ─── Comparison view ────────────────────────────────────────────────────────
   if (showComparison) {
     return (
-      <div className="p-6 max-w-5xl mx-auto">
+      <div className="p-6 max-w-5xl mx-auto" style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
         <div className="flex items-center gap-3 mb-5">
           <button
             onClick={() => setShowComparison(false)}
-            className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
+            className="text-sm"
+            style={{ color: "var(--accent-blue)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
           >
             ← Builder
           </button>
-          <span className="font-medium text-gray-900">Scenario comparison</span>
+          <span style={{ fontWeight: 600, fontSize: 15, color: "var(--text-primary)" }}>Scenario comparison</span>
         </div>
 
         {savedScenarios.length === 0 ? (
-          <div className="bg-gray-50 rounded-xl p-10 text-center text-sm text-gray-400">
+          <div
+            className="rounded-2xl p-10 text-center"
+            style={{ background: "var(--bg-secondary)", border: "1px solid var(--separator)", fontSize: 13, color: "var(--text-secondary)" }}
+          >
             No saved scenarios yet.
           </div>
         ) : (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
               {savedScenarios.map((s) => (
-                <div key={s.localId} className="bg-white border border-gray-200 rounded-xl p-3.5">
-                  <p className="text-xs font-medium text-gray-900 mb-1 truncate">{s.name}</p>
-                  <span className="inline-block bg-purple-50 text-purple-700 text-xs px-1.5 py-0.5 rounded font-medium mb-2">
+                <div
+                  key={s.localId}
+                  className="rounded-2xl p-3.5"
+                  style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+                >
+                  <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }} className="truncate">{s.name}</p>
+                  <span
+                    className="inline-block text-xs px-1.5 py-0.5 rounded font-medium mb-2"
+                    style={{ background: "rgba(127,119,221,0.12)", color: "#7F77DD" }}
+                  >
                     {s.modelLabel}
                   </span>
                   <div className="space-y-1.5 mt-2">
                     {([["ARR", fmtD(s.arr), true], ["TCV", fmtD(s.tcv), false], ["Employees", s.employees.toLocaleString(), false], ["Term", `${s.term}mo`, false], ["Impl", fmt(s.implFee), false]] as [string, string, boolean][]).map(([k, v, bold]) => (
                       <div key={k} className="flex justify-between text-xs">
-                        <span className="text-gray-400">{k}</span>
-                        <span className={bold ? "font-semibold text-purple-700" : "font-medium text-gray-900"}>{v}</span>
+                        <span style={{ color: "var(--text-secondary)" }}>{k}</span>
+                        <span style={{ fontWeight: bold ? 600 : 500, color: bold ? "#7F77DD" : "var(--text-primary)" }}>{v}</span>
                       </div>
                     ))}
                   </div>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {s.modules.map((m) => (
-                      <span key={m} className="bg-gray-100 text-gray-500 text-xs px-1.5 py-0.5 rounded">{m}</span>
+                      <span
+                        key={m}
+                        className="text-xs px-1.5 py-0.5 rounded"
+                        style={{ background: "var(--fill-primary)", color: "var(--text-secondary)" }}
+                      >
+                        {m}
+                      </span>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="bg-white border border-gray-200 rounded-xl p-4 mb-4">
-              <p className="text-xs font-medium text-gray-900 mb-3">ARR and TCV across scenarios</p>
+            <div
+              className="rounded-2xl p-4 mb-4"
+              style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+            >
+              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>ARR and TCV across scenarios</p>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={comparisonData} margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                   <YAxis tickFormatter={fmtTick} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={56} />
-                  <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 12 }} />
+                  <Tooltip
+                    formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]}
+                    contentStyle={{ fontSize: 12, background: "#FFFFFF", borderRadius: 12, border: "1px solid var(--separator)", boxShadow: "var(--shadow-md)" }}
+                  />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="ARR" fill={COLORS.arr} radius={[3, 3, 0, 0]} />
                   <Bar dataKey="TCV" fill={COLORS.tcv} radius={[3, 3, 0, 0]} />
@@ -351,7 +403,8 @@ export default function ModelerPage() {
 
         <button
           onClick={clearScenarios}
-          className="text-xs text-red-500 hover:text-red-700 border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-50"
+          className="text-xs"
+          style={{ color: "#FF3B30", background: "none", border: "none", cursor: "pointer", padding: 0 }}
         >
           Clear all
         </button>
@@ -361,7 +414,7 @@ export default function ModelerPage() {
 
   // ─── Builder view ────────────────────────────────────────────────────────────
   return (
-    <div className="p-6">
+    <div className="p-6" style={{ background: "var(--bg-primary)", minHeight: "100vh" }}>
       <div className="grid gap-4" style={{ gridTemplateColumns: "260px 1fr", alignItems: "start" }}>
         {/* ── LEFT PANEL ── */}
         <div className="space-y-3">
@@ -369,21 +422,31 @@ export default function ModelerPage() {
           {baseAccountId && (() => {
             const a = accounts.find((x) => x.id === baseAccountId);
             return a ? (
-              <div className="bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 text-xs">
-                <span className="font-medium text-blue-700">Based on: {a.customer_name}</span>
-                <p className="text-blue-500 mt-0.5">Adjust to model a new scenario.</p>
+              <div
+                className="rounded-2xl px-3 py-2 text-xs"
+                style={{ background: "rgba(0,122,255,0.08)", border: "1px solid rgba(0,122,255,0.15)" }}
+              >
+                <span style={{ fontWeight: 600, color: "var(--accent-blue)" }}>Based on: {a.customer_name}</span>
+                <p style={{ color: "rgba(0,122,255,0.7)", marginTop: 2 }}>Adjust to model a new scenario.</p>
               </div>
             ) : null;
           })()}
 
           {/* Pricing model */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3.5">
-            <p className="text-xs font-medium text-gray-900 mb-2.5">Pricing model</p>
+          <div
+            className="rounded-2xl p-4"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>Pricing model</p>
             {(["pepy", "platform", "hybrid", "usage"] as PricingModel[]).map((m) => {
               const labels = { pepy: "PEPY", platform: "Platform fee", hybrid: "PEPY + Platform", usage: "Usage-based" };
               return (
-                <label key={m} className="flex items-center gap-2 mb-2 cursor-pointer text-sm text-gray-700">
-                  <input type="radio" name="model" value={m} checked={model === m} onChange={() => setModel(m)} className="accent-gray-900" />
+                <label
+                  key={m}
+                  className="flex items-center gap-2 mb-2 cursor-pointer text-sm"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  <input type="radio" name="model" value={m} checked={model === m} onChange={() => setModel(m)} className="accent-[#007AFF]" />
                   {labels[m]}
                 </label>
               );
@@ -391,8 +454,11 @@ export default function ModelerPage() {
           </div>
 
           {/* Deal parameters */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-2.5">
-            <p className="text-xs font-medium text-gray-900">Deal parameters</p>
+          <div
+            className="rounded-2xl p-4 space-y-2.5"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>Deal parameters</p>
 
             <div>
               <InputLabel>Employees</InputLabel>
@@ -404,7 +470,12 @@ export default function ModelerPage() {
               <select
                 value={term}
                 onChange={(e) => setTerm(Number(e.target.value))}
-                className="w-full text-sm px-2.5 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full text-sm rounded-xl px-3 py-2 focus:outline-none transition-all"
+                style={{
+                  background: "var(--fill-primary)",
+                  border: "1px solid transparent",
+                  color: "var(--text-primary)",
+                }}
               >
                 {[12, 24, 36, 48].map((t) => <option key={t} value={t}>{t} months</option>)}
               </select>
@@ -415,7 +486,7 @@ export default function ModelerPage() {
                 <InputLabel>PEPY rate ($/ee/yr)</InputLabel>
                 <TextInput value={pepyRate} onChange={(v) => setPepyRate(parseFloat(v) || 0)} />
                 {marketAvgPepy !== null && (
-                  <p className="text-xs text-amber-600 mt-1">Market avg: ${Math.round(marketAvgPepy)}/PEPY</p>
+                  <p className="text-xs mt-1" style={{ color: "#BA7517" }}>Market avg: ${Math.round(marketAvgPepy)}/PEPY</p>
                 )}
               </div>
             )}
@@ -438,12 +509,16 @@ export default function ModelerPage() {
               <InputLabel>Implementation fee ($)</InputLabel>
               <TextInput value={implFee} onChange={(v) => setImplFee(parseFloat(v) || 0)} />
               {marketAvgImpl !== null && (
-                <p className="text-xs text-amber-600 mt-1">Avg: {fmt(marketAvgImpl)} for similar deals</p>
+                <p className="text-xs mt-1" style={{ color: "#BA7517" }}>Avg: {fmt(marketAvgImpl)} for similar deals</p>
               )}
               <div className="flex gap-4 mt-1.5">
                 {(["upfront", "spread"] as const).map((b) => (
-                  <label key={b} className="flex items-center gap-1.5 text-xs cursor-pointer text-gray-600">
-                    <input type="radio" name="implBilling" value={b} checked={implBilling === b} onChange={() => setImplBilling(b)} className="accent-gray-900" />
+                  <label
+                    key={b}
+                    className="flex items-center gap-1.5 text-xs cursor-pointer"
+                    style={{ color: "var(--text-secondary)" }}
+                  >
+                    <input type="radio" name="implBilling" value={b} checked={implBilling === b} onChange={() => setImplBilling(b)} className="accent-[#007AFF]" />
                     {b === "upfront" ? "One-time" : "Spread"}
                   </label>
                 ))}
@@ -452,8 +527,11 @@ export default function ModelerPage() {
           </div>
 
           {/* Modules */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3.5">
-            <p className="text-xs font-medium text-gray-900 mb-2.5">
+          <div
+            className="rounded-2xl p-4"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>
               Modules ({modules.length}{upliftPct > 0 ? ` · ${upliftPct}% uplift` : ""})
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -463,8 +541,12 @@ export default function ModelerPage() {
                   <button
                     key={m}
                     onClick={() => toggleModule(m)}
-                    className="text-xs px-2.5 py-1 rounded-lg border transition-colors"
-                    style={on ? { background: "#1c1917", color: "#fff", borderColor: "#1c1917" } : { background: "transparent", color: "#57534e", borderColor: "#d4d4d0" }}
+                    className="text-xs px-2.5 py-1 rounded-xl transition-colors"
+                    style={
+                      on
+                        ? { background: "#007AFF", color: "#FFFFFF", border: "1px solid transparent" }
+                        : { background: "var(--fill-primary)", color: "var(--text-secondary)", border: "1px solid transparent" }
+                    }
                   >
                     {m}
                   </button>
@@ -474,7 +556,10 @@ export default function ModelerPage() {
           </div>
 
           {/* Save */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3.5 space-y-2">
+          <div
+            className="rounded-2xl p-4 space-y-2"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
             <div>
               <InputLabel>Scenario name</InputLabel>
               <TextInput value={scenarioName} onChange={setScenarioName} type="text" />
@@ -482,15 +567,21 @@ export default function ModelerPage() {
             <button
               onClick={saveScenario}
               disabled={saving}
-              className="w-full text-sm font-medium py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50 transition-colors"
+              className="w-full text-sm font-medium py-2 rounded-xl text-white disabled:opacity-50 transition-colors"
+              style={{ background: "#007AFF" }}
             >
               {saving ? "Saving…" : "Save scenario"}
             </button>
-            {saveMsg && <p className="text-xs text-center text-green-600">{saveMsg}</p>}
+            {saveMsg && <p className="text-xs text-center" style={{ color: "var(--accent-green)" }}>{saveMsg}</p>}
             {savedScenarios.length > 0 && (
               <button
                 onClick={() => setShowComparison(true)}
-                className="w-full text-sm py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                className="w-full text-sm py-2 rounded-xl transition-colors"
+                style={{
+                  background: "var(--fill-secondary)",
+                  border: "1px solid var(--separator)",
+                  color: "var(--accent-blue)",
+                }}
               >
                 View comparison ({savedScenarios.length}) →
               </button>
@@ -501,19 +592,25 @@ export default function ModelerPage() {
         {/* ── RIGHT PANEL ── */}
         <div className="space-y-3 min-w-0">
           {/* Load from contract */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3.5">
-            <p className="text-xs font-medium text-gray-900 mb-2.5">Load from existing contract</p>
+          <div
+            className="rounded-2xl p-4"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 10 }}>Load from existing contract</p>
             <div className="flex flex-wrap gap-1.5">
-              {accounts.length === 0 && <span className="text-xs text-gray-400">Loading…</span>}
+              {accounts.length === 0 && (
+                <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>Loading…</span>
+              )}
               {accounts.map((a) => (
                 <button
                   key={a.id}
                   onClick={() => loadFromAccount(a)}
-                  className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${
+                  className="text-xs px-2.5 py-1 rounded-xl transition-colors"
+                  style={
                     baseAccountId === a.id
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
-                  }`}
+                      ? { background: "#007AFF", color: "#FFFFFF", border: "none" }
+                      : { background: "var(--fill-primary)", color: "var(--text-secondary)", border: "none" }
+                  }
                 >
                   {a.customer_name}
                 </button>
@@ -550,21 +647,24 @@ export default function ModelerPage() {
           </div>
 
           {/* Revenue breakdown */}
-          <div className="bg-white border border-gray-200 rounded-xl p-4">
-            <p className="text-xs font-medium text-gray-900 mb-3">Revenue breakdown</p>
+          <div
+            className="rounded-2xl p-4"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", marginBottom: 12 }}>Revenue breakdown</p>
             <div className="space-y-2">
               {Object.entries(calc.bd).map(([k, v]) => (
                 <div key={k} className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400 w-40 shrink-0">{k}</span>
+                  <span className="text-xs w-40 shrink-0" style={{ color: "var(--text-secondary)" }}>{k}</span>
                   <ProgressBar value={v} max={calc.arr || 1} color="#7F77DD" />
-                  <span className="text-xs font-medium w-16 text-right">{fmtD(v)}</span>
+                  <span className="text-xs font-medium w-16 text-right" style={{ color: "var(--text-primary)" }}>{fmtD(v)}</span>
                 </div>
               ))}
               {calc.upfront > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400 w-40 shrink-0">Impl (upfront)</span>
+                  <span className="text-xs w-40 shrink-0" style={{ color: "var(--text-secondary)" }}>Impl (upfront)</span>
                   <ProgressBar value={calc.upfront} max={calc.tcv} color="#BA7517" />
-                  <span className="text-xs font-medium w-16 text-right">{fmtD(calc.upfront)}</span>
+                  <span className="text-xs font-medium w-16 text-right" style={{ color: "var(--text-primary)" }}>{fmtD(calc.upfront)}</span>
                 </div>
               )}
             </div>
@@ -573,13 +673,19 @@ export default function ModelerPage() {
           {/* Charts row */}
           <div className="grid grid-cols-2 gap-3">
             {/* All models ARR vs TCV */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <p className="text-xs font-medium text-gray-900 mb-1">All models — ARR vs TCV</p>
+            <div
+              className="rounded-2xl p-4"
+              style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+            >
+              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 4 }}>All models — ARR vs TCV</p>
               <ResponsiveContainer width="100%" height={160}>
                 <BarChart data={allModelsData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                   <YAxis tickFormatter={fmtTick} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
-                  <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]}
+                    contentStyle={{ fontSize: 11, background: "#FFFFFF", borderRadius: 12, border: "1px solid var(--separator)", boxShadow: "var(--shadow-md)" }}
+                  />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Bar dataKey="ARR" fill={COLORS.arr} radius={[3, 3, 0, 0]} />
                   <Bar dataKey="TCV" fill={COLORS.tcv} radius={[3, 3, 0, 0]} />
@@ -588,14 +694,20 @@ export default function ModelerPage() {
             </div>
 
             {/* Headcount sensitivity */}
-            <div className="bg-white border border-gray-200 rounded-xl p-4">
-              <p className="text-xs font-medium text-gray-900 mb-0.5">Headcount sensitivity</p>
-              <p className="text-xs text-gray-400 mb-2">ARR at ±40% headcount</p>
+            <div
+              className="rounded-2xl p-4"
+              style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+            >
+              <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", marginBottom: 2 }}>Headcount sensitivity</p>
+              <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>ARR at ±40% headcount</p>
               <ResponsiveContainer width="100%" height={148}>
                 <LineChart data={calc.sensitivity} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                   <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                   <YAxis tickFormatter={fmtTick} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
-                  <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 11 }} />
+                  <Tooltip
+                    formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]}
+                    contentStyle={{ fontSize: 11, background: "#FFFFFF", borderRadius: 12, border: "1px solid var(--separator)", boxShadow: "var(--shadow-md)" }}
+                  />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Line type="monotone" dataKey="PEPY" stroke={COLORS.pepy} dot={false} strokeWidth={2} />
                   <Line type="monotone" dataKey="Platform" stroke={COLORS.platform} dot={false} strokeWidth={2} strokeDasharray="5 3" />
@@ -606,19 +718,26 @@ export default function ModelerPage() {
           </div>
 
           {/* Comparable deals */}
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-100">
-              <span className="text-xs font-medium text-gray-900">
+          <div
+            className="rounded-2xl overflow-hidden"
+            style={{ background: "#FFFFFF", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
+            <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--separator)" }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>
                 Comparable deals{" "}
-                <span className="text-gray-400 font-normal">· similar headcount</span>
+                <span style={{ fontWeight: 400, color: "var(--text-secondary)" }}>· similar headcount</span>
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-100">
+                  <tr style={{ borderBottom: "1px solid var(--separator)" }}>
                     {["Customer", "Employees", "PEPY", "Impl", "ARR", "Term"].map((h) => (
-                      <th key={h} className="text-xs text-gray-400 font-medium px-4 py-2 text-left whitespace-nowrap">
+                      <th
+                        key={h}
+                        className="px-4 py-2 text-left whitespace-nowrap uppercase tracking-wide"
+                        style={{ fontSize: 11, color: "var(--text-secondary)", fontWeight: 500 }}
+                      >
                         {h}
                       </th>
                     ))}
@@ -626,13 +745,19 @@ export default function ModelerPage() {
                 </thead>
                 <tbody>
                   {comparables.map((a) => (
-                    <tr key={a.id} className="border-b border-gray-50 hover:bg-gray-50">
-                      <td className="px-4 py-2.5 font-medium text-gray-900">{a.customer_name}</td>
-                      <td className="px-4 py-2.5 text-gray-700">{a.employees.toLocaleString()}</td>
-                      <td className="px-4 py-2.5 text-gray-700">${a.pepy}</td>
-                      <td className="px-4 py-2.5 text-gray-700">{fmt(Number(a.impl_fee))}</td>
-                      <td className="px-4 py-2.5 font-semibold text-purple-700">{fmt(Number(a.arr))}</td>
-                      <td className="px-4 py-2.5 text-gray-500">{a.contract_term_months}mo</td>
+                    <tr
+                      key={a.id}
+                      style={{ borderBottom: "1px solid var(--separator)" }}
+                      className="transition-colors"
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--fill-secondary)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <td className="px-4 py-2.5 font-medium" style={{ color: "var(--text-primary)" }}>{a.customer_name}</td>
+                      <td className="px-4 py-2.5" style={{ color: "var(--text-primary)" }}>{a.employees.toLocaleString()}</td>
+                      <td className="px-4 py-2.5" style={{ color: "var(--text-primary)" }}>${a.pepy}</td>
+                      <td className="px-4 py-2.5" style={{ color: "var(--text-primary)" }}>{fmt(Number(a.impl_fee))}</td>
+                      <td className="px-4 py-2.5 font-semibold" style={{ color: "#7F77DD" }}>{fmt(Number(a.arr))}</td>
+                      <td className="px-4 py-2.5" style={{ color: "var(--text-secondary)" }}>{a.contract_term_months}mo</td>
                     </tr>
                   ))}
                   {/* Your scenario row (amber) */}
@@ -646,7 +771,7 @@ export default function ModelerPage() {
                   </tr>
                   {comparables.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="px-4 py-4 text-center text-xs text-gray-400">
+                      <td colSpan={6} className="px-4 py-4 text-center text-xs" style={{ color: "var(--text-secondary)" }}>
                         No accounts within ±50% of {employees.toLocaleString()} employees.
                       </td>
                     </tr>

@@ -77,16 +77,16 @@ export default function AnalyzerPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64 text-sm text-gray-400">
+      <div className="flex items-center justify-center h-64 text-sm" style={{ color: "var(--text-secondary)" }}>
         Loading contracts...
       </div>
     );
   }
 
   return (
-    <div className="flex h-[calc(100vh-53px)] overflow-hidden">
+    <div className="flex h-[calc(100vh-53px)] overflow-hidden" style={{ background: "var(--bg-primary)" }}>
       {/* Sidebar */}
-      <aside className="w-72 flex-shrink-0 border-r border-gray-200 bg-white flex flex-col overflow-hidden">
+      <aside className="w-72 flex-shrink-0 flex flex-col overflow-hidden" style={{ background: "#fff", borderRight: "1px solid var(--separator)" }}>
         <ContractSidebar
           contracts={contracts}
           folders={folders}
@@ -100,7 +100,7 @@ export default function AnalyzerPage() {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+      <main className="flex-1 overflow-y-auto p-6 space-y-5">
         <QueryBar
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -109,9 +109,9 @@ export default function AnalyzerPage() {
         />
 
         {selectedIds.size < 2 ? (
-          <div className="text-center py-20 text-sm text-gray-400">
+          <div className="text-center py-20 text-sm" style={{ color: "var(--text-secondary)" }}>
             <p className="text-2xl mb-3">📋</p>
-            <p className="font-medium text-gray-600 mb-1">Select contracts to compare</p>
+            <p className="font-medium mb-1" style={{ color: "var(--text-primary)" }}>Select contracts to compare</p>
             <p>Choose 2 or more contracts from the sidebar to begin analysis.</p>
           </div>
         ) : (

@@ -63,7 +63,14 @@ function fmtD(n: number) { return `$${Math.round(n).toLocaleString()}`; }
 
 // ─── Shared UI pieces ─────────────────────────────────────────────────────────
 function Lbl({ children }: { children: React.ReactNode }) {
-  return <label className="block text-xs font-medium text-gray-500 mb-1">{children}</label>;
+  return (
+    <label
+      className="block"
+      style={{ fontSize: "11px", fontWeight: 500, color: "var(--text-secondary)", marginBottom: "4px" }}
+    >
+      {children}
+    </label>
+  );
 }
 function Inp({
   type = "text", value, onChange, placeholder, step, min, className = "",
@@ -76,7 +83,8 @@ function Inp({
       type={type} step={step} min={min} placeholder={placeholder}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className={`w-full text-sm px-2.5 py-1.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+      className={`w-full text-sm px-2.5 py-1.5 rounded-xl focus:outline-none ${className}`}
+      style={{ background: "var(--fill-primary)", border: "1px solid transparent", color: "var(--text-primary)" }}
     />
   );
 }
@@ -88,7 +96,8 @@ function Sel({
   return (
     <select
       value={value} onChange={(e) => onChange(e.target.value)}
-      className={`w-full text-sm px-2.5 py-1.5 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+      className={`w-full text-sm px-2.5 py-1.5 rounded-xl focus:outline-none ${className}`}
+      style={{ background: "var(--fill-primary)", border: "1px solid transparent", color: "var(--text-primary)" }}
     >
       {children}
     </select>
@@ -96,15 +105,18 @@ function Sel({
 }
 function PillTabs({ tabs, active, onSelect }: { tabs: string[]; active: string; onSelect: (t: string) => void }) {
   return (
-    <div className="flex gap-1.5 flex-wrap mb-4">
+    <div className="inline-flex gap-0.5 rounded-full p-1 mb-4 flex-wrap" style={{ background: "var(--fill-primary)" }}>
       {tabs.map((t) => (
         <button
           key={t} onClick={() => onSelect(t)}
-          className={`text-xs px-3.5 py-1.5 rounded-full border transition-colors ${
-            active === t
-              ? "bg-gray-900 text-white border-gray-900 font-medium"
-              : "text-gray-500 border-gray-200 hover:bg-gray-100"
+          className={`text-xs px-3.5 py-1.5 transition-all ${
+            active === t ? "rounded-full font-semibold" : "rounded-full"
           }`}
+          style={
+            active === t
+              ? { background: "#fff", color: "var(--text-primary)", boxShadow: "var(--shadow-sm)" }
+              : { color: "var(--text-secondary)" }
+          }
         >
           {t}
         </button>
@@ -113,35 +125,57 @@ function PillTabs({ tabs, active, onSelect }: { tabs: string[]; active: string; 
   );
 }
 function StatusBadge({ status }: { status: string }) {
-  const cls = status === "approved" ? "bg-green-100 text-green-800"
-            : status === "pending"  ? "bg-yellow-100 text-yellow-800"
-            : "bg-red-100 text-red-800";
-  return <span className={`inline-block text-xs px-2 py-0.5 rounded-md font-medium ${cls}`}>{status}</span>;
+  const cls = status === "approved"
+    ? "bg-green-50 text-green-700 border border-green-200 rounded-full"
+    : status === "pending"
+    ? "bg-amber-50 text-amber-700 border border-amber-200 rounded-full"
+    : "bg-red-50 text-red-700 border border-red-200 rounded-full";
+  return <span className={`inline-block text-xs px-2 py-0.5 font-medium ${cls}`}>{status}</span>;
 }
 function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`bg-white border border-gray-200 rounded-xl p-4 mb-3 ${className}`}>{children}</div>
+    <div
+      className={`bg-white rounded-2xl p-4 mb-3 card-hover ${className}`}
+      style={{ border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+    >
+      {children}
+    </div>
   );
 }
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <p className="text-xs font-semibold text-gray-800 mb-2.5">{children}</p>;
+  return (
+    <p style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "10px" }}>
+      {children}
+    </p>
+  );
 }
 function RuleTable({ headers, rows }: { headers: string[]; rows: React.ReactNode[][] }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-100">
+          <tr style={{ borderBottom: "1px solid var(--separator)" }}>
             {headers.map((h) => (
-              <th key={h} className="text-xs text-gray-400 font-medium px-3 py-2 text-left whitespace-nowrap">{h}</th>
+              <th
+                key={h}
+                className="px-3 py-2 text-left whitespace-nowrap"
+                style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}
+              >
+                {h}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row, ri) => (
-            <tr key={ri} className="border-b border-gray-50 hover:bg-gray-50">
+            <tr
+              key={ri}
+              style={{ borderBottom: "1px solid var(--separator)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--fill-secondary)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "")}
+            >
               {row.map((cell, ci) => (
-                <td key={ci} className="px-3 py-2.5 text-gray-700">{cell}</td>
+                <td key={ci} className="px-3 py-2.5" style={{ color: "var(--text-primary)" }}>{cell}</td>
               ))}
             </tr>
           ))}
@@ -369,9 +403,15 @@ function QuoteBuilder({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100">
+                <tr style={{ borderBottom: "1px solid var(--separator)" }}>
                   {["Module / Product", "List price", "Qty", "Discount %", "Net price", "Annual total", ""].map((h) => (
-                    <th key={h} className="text-xs text-gray-400 font-medium px-2 py-2 text-left whitespace-nowrap">{h}</th>
+                    <th
+                      key={h}
+                      className="px-2 py-2 text-left whitespace-nowrap"
+                      style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}
+                    >
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -380,7 +420,12 @@ function QuoteBuilder({
                   const net    = l.list_price * (1 - l.discount_pct / 100);
                   const annual = net * l.quantity * employees;
                   return (
-                    <tr key={l._id} className="border-b border-gray-50">
+                    <tr
+                      key={l._id}
+                      style={{ borderBottom: "1px solid var(--separator)" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--fill-secondary)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "")}
+                    >
                       <td className="px-1 py-1.5">
                         <Sel value={l.module_name} onChange={(v) => updateLine(l._id, "module_name", v)} className="w-36">
                           {ALL_MODULES.map((m) => <option key={m}>{m}</option>)}
@@ -398,10 +443,18 @@ function QuoteBuilder({
                           {l.discount_pct > 20 && <span className="text-red-500 text-sm">⚠</span>}
                         </div>
                       </td>
-                      <td className="px-2 py-1.5 text-sm font-medium text-gray-800">${net.toFixed(2)}</td>
+                      <td className="px-2 py-1.5 text-sm font-medium" style={{ color: "var(--text-primary)" }}>${net.toFixed(2)}</td>
                       <td className="px-2 py-1.5 text-sm font-semibold text-purple-700">{fmt(annual)}</td>
                       <td className="px-1 py-1.5">
-                        <button onClick={() => removeLine(l._id)} className="text-red-400 hover:text-red-600 text-sm px-1">✕</button>
+                        <button
+                          onClick={() => removeLine(l._id)}
+                          className="text-xs px-1 transition-all"
+                          style={{ color: "rgba(255,59,48,0.6)" }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#FF3B30")}
+                          onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,59,48,0.6)")}
+                        >
+                          ✕
+                        </button>
                       </td>
                     </tr>
                   );
@@ -409,7 +462,11 @@ function QuoteBuilder({
               </tbody>
             </table>
           </div>
-          <button onClick={addLine} className="mt-2.5 text-xs border border-gray-200 px-3 py-1.5 rounded-lg text-gray-600 hover:bg-gray-50">
+          <button
+            onClick={addLine}
+            className="mt-2.5 text-xs px-3 py-1.5 rounded-xl border-dashed transition-all"
+            style={{ border: "1.5px dashed var(--separator)", color: "var(--text-secondary)" }}
+          >
             + Add line item
           </button>
         </Card>
@@ -477,7 +534,8 @@ function QuoteBuilder({
             <Lbl>Special terms / notes</Lbl>
             <textarea
               value={notes} onChange={(e) => setNotes(e.target.value)}
-              className="w-full text-sm px-2.5 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
+              className="w-full text-sm px-2.5 py-1.5 rounded-xl focus:outline-none resize-y"
+              style={{ background: "var(--fill-primary)", border: "1px solid transparent", color: "var(--text-primary)" }}
               rows={3}
             />
           </div>
@@ -486,24 +544,27 @@ function QuoteBuilder({
 
       {/* ── Right: sticky summary ── */}
       <div className="sticky top-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-4" style={{ borderLeft: "3px solid #7F77DD" }}>
-          <p className="text-xs font-semibold text-gray-800 mb-3">Quote summary</p>
+        <div
+          className="bg-white rounded-2xl p-5"
+          style={{ border: "1px solid var(--separator)", boxShadow: "var(--shadow-lg)" }}
+        >
+          <p className="text-xs font-semibold mb-3" style={{ color: "var(--text-secondary)" }}>Quote summary</p>
 
           {/* Customer header */}
-          <p className="text-base font-bold text-purple-700 mb-0.5">{custName || "New Quote"}</p>
-          <p className="text-xs text-gray-400 mb-3">
+          <p className="text-base font-bold mb-0.5" style={{ color: "#AF52DE" }}>{custName || "New Quote"}</p>
+          <p className="text-xs mb-3" style={{ color: "var(--text-secondary)" }}>
             {[industry, `${employees.toLocaleString()} employees`, `${term}mo`].filter(Boolean).join(" · ")}
           </p>
 
           {/* Line items */}
           <div className="mb-3">
-            <p className="text-xs font-medium text-gray-500 mb-1.5">Line items</p>
+            <p className="text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Line items</p>
             {lines.map((l) => {
               const net    = l.list_price * (1 - l.discount_pct / 100);
               const annual = net * l.quantity * employees;
               return (
                 <div key={l._id} className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-700">
+                  <span style={{ color: "var(--text-primary)" }}>
                     {l.module_name}
                     {l.discount_pct > 0 && <span className="text-amber-600 ml-1">(−{l.discount_pct}%)</span>}
                   </span>
@@ -513,41 +574,41 @@ function QuoteBuilder({
             })}
             {managedSvc > 0 && (
               <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-700">Managed services</span>
+                <span style={{ color: "var(--text-primary)" }}>Managed services</span>
                 <span className="font-medium">{fmt(managedSvc * 12)}/yr</span>
               </div>
             )}
           </div>
 
           {/* Totals */}
-          <div className="border-t border-gray-100 pt-3 mb-3 space-y-1.5">
+          <div className="pt-3 mb-3 space-y-1.5" style={{ borderTop: "1px solid var(--separator)" }}>
             <div className="flex justify-between">
-              <span className="text-xs text-gray-500">ARR</span>
-              <span className="text-base font-bold text-purple-700">{fmtD(calc.arr)}</span>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>ARR</span>
+              <span className="text-base font-bold" style={{ color: "#AF52DE" }}>{fmtD(calc.arr)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-xs text-gray-500">TCV ({term}mo)</span>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>TCV ({term}mo)</span>
               <span className="text-xs font-semibold">{fmtD(calc.tcv)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-xs text-gray-500">Impl fee</span>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Impl fee</span>
               <span className="text-xs font-medium">{fmtD(implFee)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-xs text-gray-500">Effective PEPY</span>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Effective PEPY</span>
               <span className={`text-xs font-semibold ${calc.effPepy >= calc.seg.floor ? "text-green-600" : "text-red-600"}`}>
                 {calc.effPepy > 0 ? `$${calc.effPepy.toFixed(0)}` : "—"}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-xs text-gray-500">Avg discount</span>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Avg discount</span>
               <span className={`text-xs font-semibold ${calc.avgDisc > 20 ? "text-red-600" : calc.avgDisc > 10 ? "text-amber-600" : "text-green-600"}`}>
                 {calc.avgDisc.toFixed(1)}%
               </span>
             </div>
             {escalator > 0 && (
               <div className="flex justify-between">
-                <span className="text-xs text-gray-500">Yr 2 ARR (w/ escalator)</span>
+                <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Yr 2 ARR (w/ escalator)</span>
                 <span className="text-xs font-medium">{fmtD(calc.arr * (1 + escalator / 100))}</span>
               </div>
             )}
@@ -557,10 +618,14 @@ function QuoteBuilder({
           {calc.flags.length > 0 && (
             <div className="mb-3 space-y-1">
               {calc.flags.map((f, i) => {
-                const bg    = f.level === "error" ? "#fee2e2" : f.level === "warn" ? "#fef3c7" : "#dbeafe";
-                const color = f.level === "error" ? "#dc2626" : f.level === "warn" ? "#d97706" : "#2563eb";
+                const flagStyle =
+                  f.level === "error"
+                    ? { borderLeft: "3px solid #FF3B30", background: "rgba(255,59,48,0.08)", color: "#FF3B30" }
+                    : f.level === "warn"
+                    ? { borderLeft: "3px solid #FF9F0A", background: "rgba(255,159,10,0.08)", color: "#FF9F0A" }
+                    : { borderLeft: "3px solid #007AFF", background: "rgba(0,122,255,0.08)", color: "#007AFF" };
                 return (
-                  <div key={i} className="flex gap-1.5 items-start text-xs rounded-lg px-2 py-1.5" style={{ background: bg, color }}>
+                  <div key={i} className="rounded-xl px-3 py-2 flex gap-1.5 items-start text-xs" style={flagStyle}>
                     <span>⚠</span><span>{f.msg}</span>
                   </div>
                 );
@@ -569,37 +634,39 @@ function QuoteBuilder({
           )}
 
           {/* Market benchmarks */}
-          <div className="bg-gray-50 rounded-lg p-2.5 mb-3">
-            <p className="text-xs font-semibold text-gray-500 mb-1.5">Market benchmarks</p>
+          <div className="rounded-xl p-2.5 mb-3" style={{ background: "var(--fill-primary)" }}>
+            <p className="text-xs font-semibold mb-1.5" style={{ color: "var(--text-secondary)" }}>Market benchmarks</p>
             <div className="space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-gray-400">Segment</span>
-                <span className="font-medium text-gray-800">{calc.seg.label}</span>
+                <span style={{ color: "var(--text-secondary)" }}>Segment</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>{calc.seg.label}</span>
               </div>
               <div className="flex justify-between text-xs">
-                <span className="text-gray-400">PEPY floor</span>
-                <span className="font-medium text-gray-800">${calc.seg.floor}</span>
+                <span style={{ color: "var(--text-secondary)" }}>PEPY floor</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>${calc.seg.floor}</span>
               </div>
               {avgCompArr !== null && (
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-400">Avg ARR (similar)</span>
-                  <span className="font-medium text-gray-800">{fmt(avgCompArr)}</span>
+                  <span style={{ color: "var(--text-secondary)" }}>Avg ARR (similar)</span>
+                  <span className="font-medium" style={{ color: "var(--text-primary)" }}>{fmt(avgCompArr)}</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2">
             <button
               onClick={handleSave} disabled={saving}
-              className="flex-1 text-sm font-medium py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
+              className="w-full text-sm font-semibold py-3 rounded-xl text-white transition-all hover:opacity-90 disabled:opacity-50"
+              style={{ background: "var(--accent-blue)" }}
             >
               {saving ? "Saving…" : "Save quote"}
             </button>
             <button
               onClick={handleExport}
-              className="text-sm py-2 px-3 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+              className="w-full text-sm py-3 rounded-xl border transition-all hover:opacity-80"
+              style={{ border: "1px solid var(--separator)", color: "var(--text-primary)" }}
             >
               Export
             </button>
@@ -617,7 +684,7 @@ function QuoteBuilder({
 
 // ─── Tab: Pricing Rules ───────────────────────────────────────────────────────
 function PricingRules({ rules }: { rules: RulesData | null }) {
-  if (!rules) return <p className="text-sm text-gray-400">Loading rules…</p>;
+  if (!rules) return <p className="text-sm" style={{ color: "var(--text-secondary)" }}>Loading rules…</p>;
 
   const discColor = (pct: number) =>
     pct <= 10 ? "text-green-600" : pct <= 20 ? "text-amber-600" : pct <= 30 ? "text-red-600" : "text-purple-700";
@@ -648,12 +715,12 @@ function PricingRules({ rules }: { rules: RulesData | null }) {
             headers={["Bundle", "Modules included", "Discount"]}
             rows={rules.bundles.map((b) => [
               <span key="n" className="font-medium">{b.bundle_name}</span>,
-              <span key="m" className="text-xs text-gray-400">
+              <span key="m" className="text-xs" style={{ color: "var(--text-secondary)" }}>
                 {b.bundle_rule_modules.map((m) => m.module_name).join(", ") || "—"}
               </span>,
               b.discount_pct > 0
                 ? <span key="d" className="font-semibold text-green-600">{b.discount_pct}%</span>
-                : <span key="d" className="text-gray-400">—</span>,
+                : <span key="d" style={{ color: "var(--text-secondary)" }}>—</span>,
             ])}
           />
         </Card>
@@ -687,7 +754,7 @@ function PricingRules({ rules }: { rules: RulesData | null }) {
               g.standard_fee ? fmtD(g.standard_fee) : g.hourly_rate ? `T&M @ $${g.hourly_rate}/hr` : "—",
               g.floor_fee
                 ? <span key="f" className="font-semibold text-red-600">{fmtD(g.floor_fee)}</span>
-                : <span key="f" className="text-gray-400">—</span>,
+                : <span key="f" style={{ color: "var(--text-secondary)" }}>—</span>,
             ])}
           />
         </Card>
@@ -707,7 +774,7 @@ function Approvals({
 
   if (pending.length === 0) {
     return (
-      <div className="bg-gray-50 rounded-xl p-10 text-center text-sm text-gray-400">
+      <div className="rounded-2xl p-10 text-center text-sm" style={{ background: "var(--fill-primary)", color: "var(--text-secondary)" }}>
         No pending approvals. Quotes exceeding discount thresholds will appear here.
       </div>
     );
@@ -718,11 +785,15 @@ function Approvals({
       {pending.map((q) => {
         const approver = q.quote_approvals?.[0]?.required_approver ?? "Sales Manager";
         return (
-          <div key={q.id} className="bg-white border border-gray-200 rounded-xl p-4" style={{ borderLeft: "3px solid #d97706" }}>
+          <div
+            key={q.id}
+            className="bg-white rounded-2xl p-4 card-hover"
+            style={{ borderLeft: "4px solid #FF9F0A", border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+          >
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className="font-semibold text-sm text-gray-900">{q.customer_name}</span>
+              <span className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>{q.customer_name}</span>
               <StatusBadge status={q.status} />
-              <span className="ml-auto text-xs text-gray-400">{q.quote_date}</span>
+              <span className="ml-auto text-xs" style={{ color: "var(--text-secondary)" }}>{q.quote_date}</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
               {[
@@ -733,9 +804,9 @@ function Approvals({
               ].map(({ label, value, accent }) => {
                 const borders: Record<string, string> = { blue: "#378ADD", amber: "#BA7517", purple: "#7F77DD", green: "#1D9E75" };
                 return (
-                  <div key={label} className="bg-white border border-gray-100 rounded-lg p-2.5" style={{ borderLeft: `3px solid ${borders[accent]}` }}>
-                    <p className="text-xs text-gray-400">{label}</p>
-                    <p className="text-sm font-semibold text-gray-900">{value}</p>
+                  <div key={label} className="bg-white rounded-lg p-2.5" style={{ borderLeft: `3px solid ${borders[accent]}`, border: "1px solid var(--separator)" }}>
+                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{label}</p>
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{value}</p>
                   </div>
                 );
               })}
@@ -743,17 +814,22 @@ function Approvals({
             <div className="flex gap-2">
               <button
                 onClick={() => onStatusChange(q.id, "approved")}
-                className="text-sm font-medium px-4 py-1.5 rounded-lg bg-green-600 text-white hover:bg-green-700"
+                className="text-sm font-medium px-4 py-1.5 rounded-xl text-white"
+                style={{ background: "#34C759" }}
               >
                 Approve
               </button>
               <button
                 onClick={() => onStatusChange(q.id, "rejected")}
-                className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-red-600 hover:bg-red-50"
+                className="text-sm px-4 py-1.5 rounded-xl border"
+                style={{ border: "1px solid #FF3B30", color: "#FF3B30" }}
               >
                 Reject
               </button>
-              <button className="text-sm px-4 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50">
+              <button
+                className="text-sm px-4 py-1.5 rounded-xl border transition-all hover:opacity-80"
+                style={{ border: "1px solid var(--separator)", color: "var(--text-primary)" }}
+              >
                 Request info
               </button>
             </div>
@@ -768,7 +844,7 @@ function Approvals({
 function SavedQuotes({ quotes }: { quotes: SavedQuote[] }) {
   if (quotes.length === 0) {
     return (
-      <div className="bg-gray-50 rounded-xl p-10 text-center text-sm text-gray-400">
+      <div className="rounded-2xl p-10 text-center text-sm" style={{ background: "var(--fill-primary)", color: "var(--text-secondary)" }}>
         No saved quotes yet. Build a quote and click Save.
       </div>
     );
@@ -777,17 +853,21 @@ function SavedQuotes({ quotes }: { quotes: SavedQuote[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {quotes.map((q) => (
-        <div key={q.id} className="bg-white border border-gray-200 rounded-xl p-3.5">
+        <div
+          key={q.id}
+          className="bg-white rounded-2xl p-4 card-hover"
+          style={{ border: "1px solid var(--separator)", boxShadow: "var(--shadow-sm)" }}
+        >
           <div className="flex justify-between items-start mb-1.5">
-            <span className="text-xs font-semibold text-gray-900 truncate mr-2">{q.customer_name}</span>
+            <span className="text-xs font-semibold truncate mr-2" style={{ color: "var(--text-primary)" }}>{q.customer_name}</span>
             <StatusBadge status={q.status} />
           </div>
           <p className="text-lg font-bold text-purple-700 mb-2">{fmtD(q.arr)}</p>
           <div className="space-y-1">
             {([["TCV", fmtD(q.tcv)], ["Term", `${q.term_months}mo`], ["Employees", q.employees.toLocaleString()], ["Max disc", `${q.max_discount_pct}%`], ["Date", q.quote_date]] as [string, string][]).map(([k, v]) => (
               <div key={k} className="flex justify-between text-xs">
-                <span className="text-gray-400">{k}</span>
-                <span className="font-medium text-gray-800">{v}</span>
+                <span style={{ color: "var(--text-secondary)" }}>{k}</span>
+                <span className="font-medium" style={{ color: "var(--text-primary)" }}>{v}</span>
               </div>
             ))}
           </div>
@@ -842,7 +922,7 @@ export default function CpqPage() {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-6" style={{ background: "var(--bg-primary)" }}>
       <PillTabs tabs={[...TABS]} active={tab} onSelect={(t) => setTab(t as Tab)} />
 
       {tab === "Quote Builder" && (

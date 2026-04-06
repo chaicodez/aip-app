@@ -1,3 +1,6 @@
+// Secrets loaded from environment — never hardcode here
+// Required Vercel env vars: SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY
+
 /**
  * Jira Connector
  *

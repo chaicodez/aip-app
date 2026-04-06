@@ -84,31 +84,32 @@ export default async function AccountDetailPage({
   const rev = arr + implFee;
   const net = rev - proservCost - rdCost;
   const margin = rev > 0 ? (net / rev) * 100 : 0;
-  const marginColor =
-    margin >= 30 ? "#16a34a" : margin >= 0 ? "#d97706" : "#dc2626";
-
   const statusCls =
     account.status === "Active"
-      ? "bg-green-100 text-green-800"
+      ? "bg-green-50 text-green-700 border border-green-200"
       : account.status === "At Risk"
-      ? "bg-yellow-100 text-yellow-800"
-      : "bg-red-100 text-red-800";
+      ? "bg-red-50 text-red-700 border border-red-200"
+      : "bg-gray-100 text-gray-600 border border-gray-200";
+
+  const marginColor =
+    margin >= 30 ? "#34C759" : margin >= 0 ? "#FF9500" : "#FF3B30";
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-3 mb-4">
+      <div className="flex flex-wrap items-center gap-3 mb-5">
         <Link
           href="/crm"
-          className="text-sm border border-gray-200 px-3 py-1.5 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors"
+          className="text-sm font-medium transition-all hover:opacity-70"
+          style={{ color: "var(--accent-blue)" }}
         >
           ← Back
         </Link>
-        <h1 className="text-base font-semibold text-gray-900">{account.customer_name}</h1>
-        <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${statusCls}`}>
+        <h1 className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{account.customer_name}</h1>
+        <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${statusCls}`}>
           {account.status}
         </span>
-        <span className="ml-auto text-xs text-gray-400">
+        <span className="ml-auto text-xs" style={{ color: "var(--text-secondary)" }}>
           {fmt(arr)} ARR &nbsp;·&nbsp;{" "}
           <span className="font-semibold" style={{ color: marginColor }}>
             {margin.toFixed(1)}%
