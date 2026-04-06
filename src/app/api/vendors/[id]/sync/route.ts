@@ -37,7 +37,7 @@ export async function POST(
           .eq("id", job.id);
       }
 
-      revalidateTag("vendor-health");
+      revalidateTag("vendor-health", {});
       return NextResponse.json({ ok: true, ...result });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -86,7 +86,7 @@ export async function POST(
       .update({ last_sync_at: now, record_count: newCount, status: "healthy", error_count: 0 })
       .eq("id", id);
     if (updateErr) return dbError(updateErr, `vendors/${id}/sync vendor update`);
-    revalidateTag("vendor-health");
+    revalidateTag("vendor-health", {});
 
     if (job?.id) {
       const { error: jobUpdateErr } = await supabase
