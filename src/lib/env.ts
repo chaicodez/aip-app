@@ -9,12 +9,16 @@ function requireEnv(key: string): string {
   return val ?? "";
 }
 
+function optionalEnv(key: string): string {
+  return process.env[key] ?? "";
+}
+
 // Lazy getters — validation runs at request time, not at build time
 export const env = {
-  get supabaseUrl()          { return requireEnv("NEXT_PUBLIC_SUPABASE_URL"); },
-  get supabaseAnonKey()      { return requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"); },
+  get supabaseUrl()           { return requireEnv("NEXT_PUBLIC_SUPABASE_URL"); },
+  get supabaseAnonKey()       { return requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"); },
   get supabaseServiceRoleKey(){ return requireEnv("SUPABASE_SERVICE_ROLE_KEY"); },
-  get anthropicApiKey()      { return requireEnv("ANTHROPIC_API_KEY"); },
-  get googleServiceAccount() { return requireEnv("GOOGLE_SERVICE_ACCOUNT_JSON"); },
-  get appUrl()               { return requireEnv("NEXT_PUBLIC_APP_URL"); },
+  get appUrl()                { return requireEnv("NEXT_PUBLIC_APP_URL"); },
+  get anthropicApiKey()       { return optionalEnv("ANTHROPIC_API_KEY"); },
+  get googleServiceAccount()  { return optionalEnv("GOOGLE_SERVICE_ACCOUNT_JSON"); },
 } as const;
