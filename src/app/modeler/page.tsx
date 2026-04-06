@@ -210,7 +210,7 @@ export default function ModelerPage() {
   useEffect(() => {
     fetch("/api/accounts")
       .then((r) => r.json())
-      .then((data: AccountRow[]) => setAccounts(data))
+      .then((data: unknown) => setAccounts(Array.isArray(data) ? (data as AccountRow[]) : []))
       .catch(console.error);
   }, []);
 
@@ -222,7 +222,7 @@ export default function ModelerPage() {
 
   // Comparable accounts (±50% headcount, up to 3)
   const comparables = useMemo(
-    () => accounts.filter((a) => Math.abs(a.employees - employees) / employees < 0.5).slice(0, 3),
+    () => (Array.isArray(accounts) ? accounts : []).filter((a) => Math.abs(a.employees - employees) / employees < 0.5).slice(0, 3),
     [accounts, employees]
   );
 
