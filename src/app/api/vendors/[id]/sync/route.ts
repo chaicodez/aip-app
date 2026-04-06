@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { getServiceClient } from "@/lib/supabase/service";
 import { apiError, dbError } from "@/lib/api-error";
 
@@ -37,7 +36,6 @@ export async function POST(
           .eq("id", job.id);
       }
 
-      revalidateTag("vendor-health");
       return NextResponse.json({ ok: true, ...result });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -86,7 +84,6 @@ export async function POST(
       .update({ last_sync_at: now, record_count: newCount, status: "healthy", error_count: 0 })
       .eq("id", id);
     if (updateErr) return dbError(updateErr, `vendors/${id}/sync vendor update`);
-    revalidateTag("vendor-health");
 
     if (job?.id) {
       const { error: jobUpdateErr } = await supabase
