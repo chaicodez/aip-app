@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DetailTabs } from "./detail-tabs";
+import { getServiceClient } from "@/lib/supabase/service";
+
+export const dynamic = "force-dynamic";
 
 const HR = 185;
 
@@ -10,20 +13,44 @@ function fmt(n: number) {
   return `$${Math.round(n).toLocaleString()}`;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
 export default async function AccountDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const supabase = getServiceClient();
 
-  const res = await fetch(`${baseUrl}/api/accounts/${id}`, { cache: "no-store" });
-  if (!res.ok) notFound();
+  const [accountRes, opportunitiesRes, proservRes, rdRes] = await Promise.all([
+    supabase
+      .from("accounts")
+      .select("*, account_modules(module_name, modules(name, price_pepy))")
+      .eq("id", id)
+      .single(),
+    supabase
+      .from("opportunities")
+      .select("*")
+      .eq("account_id", id)
+      .order("close_date", { ascending: false }),
+    supabase
+      .from("proserv_engagements")
+      .select("*, proserv_resources(*)")
+      .eq("account_id", id)
+      .single(),
+    supabase
+      .from("rd_tickets")
+      .select("*")
+      .eq("account_id", id)
+      .order("priority"),
+  ]);
 
-  const { account: raw, opportunities: opportunitiesRaw, proserv: proservRaw, rdTickets: rdRaw } =
-    await res.json();
+  if (accountRes.error) notFound();
+  if (!accountRes.data) notFound();
+
+  const raw = accountRes.data;
+  const opportunitiesRaw = opportunitiesRes.data ?? [];
+  const proservRaw = proservRes.data ?? null;
+  const rdRaw = rdRes.data ?? [];
 
   const account = {
     id: raw.id as string,

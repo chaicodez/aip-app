@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { unstable_cache } from "next/cache";
 import type { Account, AccountStatus, ModuleName } from "@/lib/types";
+import { getServiceClient } from "@/lib/supabase/service";
+
+export const dynamic = "force-dynamic";
 
 type AccountRow = Account & { account_modules: { module_name: ModuleName }[] };
 
@@ -35,12 +38,11 @@ function statusBadge(s: AccountStatus) {
 
 const STAT_ACCENTS = ["#007AFF", "#34C759", "#FF3B30", "#AF52DE"];
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
 const getVendorHealth = unstable_cache(
   async () => {
-    const res = await fetch(`${baseUrl}/api/vendors`, { cache: "no-store" });
-    return res.ok ? (await res.json()) as VendorHealth[] : [];
+    const supabase = getServiceClient();
+    const { data } = await supabase.from("vendors").select("*").order("name");
+    return (data ?? []) as VendorHealth[];
   },
   ["vendor-health"],
   { revalidate: 60, tags: ["vendor-health"] }
@@ -53,23 +55,23 @@ export default async function CrmPage({
 }) {
   const { sort, search } = await searchParams;
 
-  const [accountsRes, vendors] = await Promise.all([
-    fetch(`${baseUrl}/api/accounts`, { cache: "no-store" }),
+  const supabase = getServiceClient();
+  const [{ data, error }, vendors] = await Promise.all([
+    supabase.from("accounts").select("*, account_modules(module_name)").order("customer_name"),
     getVendorHealth(),
   ]);
 
-  if (!accountsRes.ok) {
-    const { error } = await accountsRes.json();
-    return <div className="p-8 text-red-600">Error: {error}</div>;
+  if (error) {
+    return <div className="p-8 text-red-600">Error: {error.message}</div>;
   }
 
-  const data: AccountRow[] = await accountsRes.json();
+  const accounts: AccountRow[] = (data ?? []) as AccountRow[];
 
   const healthyCount = vendors.filter((v) => v.status === "healthy").length;
   const warningCount = vendors.filter((v) => v.status === "warning").length;
   const totalErrors  = vendors.reduce((s, v) => s + v.error_count, 0);
 
-  let rows = [...data];
+  let rows = [...accounts];
   if (sort === "arr") {
     rows.sort((a, b) => Number(a.arr) - Number(b.arr));
   } else if (sort === "arr_desc") {

@@ -1,5 +1,8 @@
 import Link from "next/link";
 import { SyncButton } from "./sync-button";
+import { getServiceClient } from "@/lib/supabase/service";
+
+export const dynamic = "force-dynamic";
 
 interface Vendor {
   id: string;
@@ -48,11 +51,10 @@ function VendorIcon({ icon, name }: { icon: string | null; name: string }) {
   );
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-
 export default async function SettingsPage() {
-  const res = await fetch(`${baseUrl}/api/vendors`, { cache: "no-store" });
-  const vendors: Vendor[] = res.ok ? await res.json() : [];
+  const supabase = getServiceClient();
+  const { data } = await supabase.from("vendors").select("*").order("name");
+  const vendors: Vendor[] = (data ?? []) as Vendor[];
 
   const all = vendors;
   const healthy = all.filter((v) => v.status === "healthy").length;
