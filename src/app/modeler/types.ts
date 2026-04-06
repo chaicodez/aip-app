@@ -62,12 +62,12 @@ export function calcScenario({
 
   const current = allModels[model];
 
-  const bd: Record<string, number> = (() => {
+  const bd = (() => {
     if (model === "pepy")     return { "Subscription (PEPY)": pepyArr };
     if (model === "platform") return { "Platform fee": platArr };
     if (model === "hybrid")   return { "PEPY component": pepyArr * 0.6, "Platform component": platArr * 0.4 };
     return { "Usage revenue": usageArr };
-  })();
+  })() as unknown as Record<string, number>;
 
   if (implBilling === "spread") bd["Impl (spread)"] = (implFee / term) * 12;
 

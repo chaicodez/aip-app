@@ -95,7 +95,7 @@ export function OutputsPanel({ calc, accounts, comparables, employees, pepyRate,
             <BarChart data={allModelsData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
               <XAxis dataKey="name" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
               <YAxis tickFormatter={fmtTick} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
-              <Tooltip formatter={(v: number) => [fmtD(v)]} contentStyle={{ fontSize: 11 }} />
+              <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 11 }} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Bar dataKey="ARR" fill={COLORS.arr} radius={[3, 3, 0, 0]} />
               <Bar dataKey="TCV" fill={COLORS.tcv} radius={[3, 3, 0, 0]} />
@@ -110,7 +110,7 @@ export function OutputsPanel({ calc, accounts, comparables, employees, pepyRate,
             <LineChart data={calc.sensitivity} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
               <YAxis tickFormatter={fmtTick} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
-              <Tooltip formatter={(v: number) => [fmtD(v)]} contentStyle={{ fontSize: 11 }} />
+              <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 11 }} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
               <Line type="monotone" dataKey="PEPY" stroke={COLORS.pepy} dot={false} strokeWidth={2} />
               <Line type="monotone" dataKey="Platform" stroke={COLORS.platform} dot={false} strokeWidth={2} strokeDasharray="5 3" />

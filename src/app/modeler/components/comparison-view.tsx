@@ -55,7 +55,7 @@ export function ComparisonView({
               <BarChart data={comparisonData} margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                 <YAxis tickFormatter={fmtTick} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={56} />
-                <Tooltip formatter={(v: number) => [fmtD(v)]} contentStyle={{ fontSize: 12 }} />
+                <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 12 }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Bar dataKey="ARR" fill={COLORS.arr} radius={[3, 3, 0, 0]} />
                 <Bar dataKey="TCV" fill={COLORS.tcv} radius={[3, 3, 0, 0]} />

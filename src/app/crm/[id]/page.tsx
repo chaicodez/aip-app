@@ -79,7 +79,7 @@ export default async function AccountDetailPage({
   const arr = account.arr;
   const implFee = account.impl_fee;
   const proservCost = proserv ? proserv.total_hours * HR : 0;
-  const rdHours = rdTickets.reduce((s, t) => s + t.hours, 0);
+  const rdHours = rdTickets.reduce((s: number, t: { hours: number }) => s + t.hours, 0);
   const rdCost = rdHours * HR;
   const rev = arr + implFee;
   const net = rev - proservCost - rdCost;

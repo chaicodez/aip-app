@@ -39,7 +39,7 @@ export function ProServChart({
           axisLine={false}
         />
         <Tooltip
-          formatter={(v: number) => [`${v}h`, "Hours"]}
+          formatter={(v) => [typeof v === "number" ? `${v}h` : "0h", "Hours"]}
           contentStyle={{ fontSize: 12 }}
         />
         <Bar dataKey="Hours" radius={[0, 3, 3, 0]} fill="#7F77DD" />
@@ -83,7 +83,7 @@ export function ProfitabilityChart({
           axisLine={false}
           width={56}
         />
-        <Tooltip formatter={(v: number) => [fmtK(v)]} contentStyle={{ fontSize: 12 }} />
+        <Tooltip formatter={(v) => [typeof v === "number" ? fmtK(v) : "$0"]} contentStyle={{ fontSize: 12 }} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Bar dataKey="ARR" stackId="a" fill="#7F77DD" radius={[0, 0, 0, 0]}>
           {data.map((_, i) => (

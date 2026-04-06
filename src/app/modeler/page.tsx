@@ -131,12 +131,12 @@ function calcScenario({
 
   const current = allModels[model];
 
-  const bd: Record<string, number> = (() => {
+  const bd = (() => {
     if (model === "pepy")     return { "Subscription (PEPY)": pepyArr };
     if (model === "platform") return { "Platform fee": platArr };
     if (model === "hybrid")   return { "PEPY component": pepyArr * 0.6, "Platform component": platArr * 0.4 };
     return { "Usage revenue": usageArr };
-  })();
+  })() as unknown as Record<string, number>;
 
   if (implBilling === "spread") bd["Impl (spread)"] = implFee / term * 12;
 
@@ -339,7 +339,7 @@ export default function ModelerPage() {
                 <BarChart data={comparisonData} margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
                   <YAxis tickFormatter={fmtTick} tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={56} />
-                  <Tooltip formatter={(v: number) => [fmtD(v)]} contentStyle={{ fontSize: 12 }} />
+                  <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="ARR" fill={COLORS.arr} radius={[3, 3, 0, 0]} />
                   <Bar dataKey="TCV" fill={COLORS.tcv} radius={[3, 3, 0, 0]} />
@@ -579,7 +579,7 @@ export default function ModelerPage() {
                 <BarChart data={allModelsData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                   <XAxis dataKey="name" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                   <YAxis tickFormatter={fmtTick} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
-                  <Tooltip formatter={(v: number) => [fmtD(v)]} contentStyle={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 11 }} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Bar dataKey="ARR" fill={COLORS.arr} radius={[3, 3, 0, 0]} />
                   <Bar dataKey="TCV" fill={COLORS.tcv} radius={[3, 3, 0, 0]} />
@@ -595,7 +595,7 @@ export default function ModelerPage() {
                 <LineChart data={calc.sensitivity} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
                   <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
                   <YAxis tickFormatter={fmtTick} tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={48} />
-                  <Tooltip formatter={(v: number) => [fmtD(v)]} contentStyle={{ fontSize: 11 }} />
+                  <Tooltip formatter={(v) => [typeof v === "number" ? fmtD(v) : "$0"]} contentStyle={{ fontSize: 11 }} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Line type="monotone" dataKey="PEPY" stroke={COLORS.pepy} dot={false} strokeWidth={2} />
                   <Line type="monotone" dataKey="Platform" stroke={COLORS.platform} dot={false} strokeWidth={2} strokeDasharray="5 3" />
