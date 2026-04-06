@@ -22,6 +22,7 @@ const navLinks = [
   { href: "/crm",      label: "CRM" },
   { href: "/modeler",  label: "Modeler" },
   { href: "/cpq",      label: "CPQ" },
+  { href: "/analyzer", label: "Analyzer" },
   { href: "/settings", label: "Settings", icon: "⚙" },
 ];
 
