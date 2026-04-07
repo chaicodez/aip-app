@@ -24,17 +24,21 @@ export async function GET() {
   try {
     const supabase = getServiceClient();
 
-    const { data: folders, error } = await supabase
+    interface GDriveFolder { id: string; folder_id: string; folder_name: string; created_at: string; [k: string]: unknown }
+    // gdrive_folders not in generated schema
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: folders, error } = await (supabase as any)
       .from("gdrive_folders")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false }) as { data: GDriveFolder[] | null; error: { message: string; code?: string } | null };
 
     if (error) return dbError(error, "folders GET");
 
-    // Count contracts per folder
-    const { data: uploads } = await supabase
+    // Count contracts per folder — contract_uploads not in generated schema
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: uploads } = await (supabase as any)
       .from("contract_uploads")
-      .select("gdrive_folder_id");
+      .select("gdrive_folder_id") as { data: { gdrive_folder_id: string | null }[] | null };
 
     const counts: Record<string, number> = {};
     for (const u of uploads ?? []) {
@@ -72,12 +76,13 @@ export async function POST(req: NextRequest) {
       return apiError(`Cannot access folder: ${err instanceof Error ? err.message : String(err)}`, 400);
     }
 
-    // Upsert folder row
-    const { data: folder, error: folderErr } = await supabase
+    // Upsert folder row — gdrive_folders not in generated schema
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: folder, error: folderErr } = await (supabase as any)
       .from("gdrive_folders")
       .upsert({ folder_id: folderId, folder_name: folderName }, { onConflict: "folder_id" })
       .select()
-      .single();
+      .single() as { data: { id: string; folder_id: string; folder_name: string } | null; error: { message: string; code?: string } | null };
 
     if (folderErr) return dbError(folderErr, "folders POST upsert");
 
@@ -96,10 +101,11 @@ export async function DELETE(req: NextRequest) {
     if (!body.folder_id) return apiError("folder_id is required", 400);
 
     const supabase = getServiceClient();
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from("gdrive_folders")
       .delete()
-      .eq("folder_id", body.folder_id);
+      .eq("folder_id", body.folder_id) as { error: { message: string; code?: string } | null };
 
     if (error) return dbError(error, "folders DELETE");
     return NextResponse.json({ ok: true });

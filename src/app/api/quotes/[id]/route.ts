@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServiceClient } from "@/lib/supabase/service";
 import { apiError, dbError } from "@/lib/api-error";
+import type { QuoteStatus, ApprovalStatus } from "@/lib/types";
 
 export async function PATCH(
   req: NextRequest,
@@ -9,7 +10,8 @@ export async function PATCH(
   try {
     const { id } = await params;
     const supabase = getServiceClient();
-    const { status } = await req.json();
+    const body = await req.json() as { status: QuoteStatus };
+    const status: QuoteStatus = body.status;
 
     const { data, error } = await supabase
       .from("quotes")
@@ -22,11 +24,12 @@ export async function PATCH(
 
     // Also update any pending approval records
     if (status === "approved" || status === "rejected") {
+      const approvalStatus = status as ApprovalStatus;
       await supabase
         .from("quote_approvals")
-        .update({ status, approved_at: new Date().toISOString() })
+        .update({ status: approvalStatus, approved_at: new Date().toISOString() })
         .eq("quote_id", id)
-        .eq("status", "pending");
+        .eq("status", "pending" as ApprovalStatus);
     }
 
     return NextResponse.json(data);

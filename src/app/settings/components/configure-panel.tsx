@@ -29,18 +29,29 @@ export function ConfigurePanel({ vendor, onClose }: Props) {
   const [data, setData] = useState<VendorConfigData | null>(null);
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; latency_ms?: number } | null>(null);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; latency_ms?: number; error_detail?: string } | null>(null);
   const [syncing, setSyncing] = useState(false);
   const router = useRouter();
 
-  const load = useCallback(async () => {
+  // AbortController-guarded load — cancels stale in-flight requests on unmount or vendor change
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
-    const res = await fetch(`/api/vendors/${vendor.id}/config`);
-    if (res.ok) setData(await res.json());
-    setLoading(false);
+    try {
+      const res = await fetch(`/api/vendors/${vendor.id}/config`, { signal });
+      if (res.ok) setData(await res.json());
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      console.error("[ConfigurePanel] config fetch failed:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [vendor.id]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
+  }, [load]);
 
   // Close on Escape
   useEffect(() => {
@@ -60,7 +71,7 @@ export function ConfigurePanel({ vendor, onClose }: Props) {
     setSyncing(true);
     await fetch(`/api/vendors/${vendor.id}/sync`, { method: "POST" });
     setSyncing(false);
-    await load();
+    await load(); // no abort signal here — intentional reload after sync
     router.refresh();
   }
 
@@ -99,14 +110,22 @@ export function ConfigurePanel({ vendor, onClose }: Props) {
                 <span className="text-xs capitalize" style={{ color: "var(--text-secondary)" }}>{vendor.status}</span>
               </div>
             </div>
-            <button
-              onClick={handleTest}
-              disabled={testing}
-              className="text-xs px-3 py-1.5 rounded-xl font-medium transition-all"
-              style={{ background: testResult ? (testResult.ok ? "rgba(52,199,89,0.1)" : "rgba(255,59,48,0.1)") : "var(--fill-primary)", color: testResult ? (testResult.ok ? "#34C759" : "#FF3B30") : "var(--text-secondary)" }}
-            >
-              {testing ? "Testing…" : testResult ? (testResult.ok ? `✓ ${testResult.latency_ms}ms` : "✗ Failed") : "Test Connection"}
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              <button
+                onClick={handleTest}
+                disabled={testing}
+                className="text-xs px-3 py-1.5 rounded-xl font-medium transition-all whitespace-nowrap"
+                title={testResult?.error_detail ?? ""}
+                style={{ background: testResult ? (testResult.ok ? "rgba(52,199,89,0.1)" : "rgba(255,59,48,0.1)") : "var(--fill-primary)", color: testResult ? (testResult.ok ? "#34C759" : "#FF3B30") : "var(--text-secondary)" }}
+              >
+                {testing ? "Testing…" : testResult ? (testResult.ok ? `✓ ${testResult.latency_ms}ms` : "✗ Failed") : "Test Connection"}
+              </button>
+              {testResult && !testResult.ok && testResult.error_detail && (
+                <p className="text-right leading-tight max-w-48" style={{ color: "#FF3B30", fontSize: "10px" }}>
+                  {testResult.error_detail}
+                </p>
+              )}
+            </div>
             <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center text-lg hover:bg-gray-100" style={{ color: "var(--text-secondary)" }}>×</button>
           </div>
 

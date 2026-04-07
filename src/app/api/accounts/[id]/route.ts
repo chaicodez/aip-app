@@ -37,10 +37,11 @@ export async function GET(
       if (accountRes.error.code === "PGRST116") return apiError("Not found", 404);
       return dbError(accountRes.error, `accounts/${id} GET`);
     }
-    if (!accountRes.data) return apiError("Not found", 404);
+    const account = accountRes.data;
+    if (!account) return apiError("Not found", 404);
 
     return NextResponse.json({
-      account: accountRes.data,
+      account,
       opportunities: opportunitiesRes.data ?? [],
       proserv: proservRes.data ?? null,
       rdTickets: rdRes.data ?? [],

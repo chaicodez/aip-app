@@ -38,7 +38,7 @@ export function TabConnection({ data, onClose }: Props) {
   const [config, setConfig] = useState<Record<string, string>>(vendor.config ?? {});
   const [authType, setAuthType] = useState(vendor.auth_type ?? "oauth2");
   const [show, setShow] = useState<Record<string, boolean>>({});
-  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; latency_ms?: number } | null>(null);
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; latency_ms?: number; error_detail?: string } | null>(null);
   const [testing, setTesting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -136,9 +136,16 @@ export function TabConnection({ data, onClose }: Props) {
       )}
 
       {testResult && (
-        <p className="text-sm px-3 py-2 rounded-lg" style={{ background: testResult.ok ? "rgba(52,199,89,0.15)" : "rgba(255,59,48,0.15)", color: testResult.ok ? "#34C759" : "#FF3B30" }}>
-          {testResult.ok ? `✓ ${testResult.message} — ${testResult.latency_ms}ms` : `✗ ${testResult.message}`}
-        </p>
+        <div className="rounded-lg px-3 py-2 space-y-1" style={{ background: testResult.ok ? "rgba(52,199,89,0.15)" : "rgba(255,59,48,0.15)" }}>
+          <p className="text-sm" style={{ color: testResult.ok ? "#34C759" : "#FF3B30" }}>
+            {testResult.ok ? `✓ ${testResult.message} — ${testResult.latency_ms}ms` : `✗ ${testResult.message}`}
+          </p>
+          {!testResult.ok && testResult.error_detail && (
+            <p className="text-xs font-mono break-all" style={{ color: "rgba(255,59,48,0.8)" }}>
+              {testResult.error_detail}
+            </p>
+          )}
+        </div>
       )}
 
       <div className="flex gap-2 pt-2">

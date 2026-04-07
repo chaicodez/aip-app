@@ -19,7 +19,7 @@ export async function GET(
 
   if (status) query = query.eq("status", status);
 
-  const { data, error } = await query;
+  const { data, error } = await query.limit(100);
   if (error) return dbError(error, `vendors/${id}/errors GET`);
   return NextResponse.json(data);
 }

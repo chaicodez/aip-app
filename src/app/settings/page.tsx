@@ -4,7 +4,7 @@ import { IntegrationList } from "./components/integration-list";
 import { AvailableIntegrations } from "./components/available-integrations";
 import type { ExtendedVendor } from "./components/settings-types";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function SettingsPage() {
   const supabase = getServiceClient();
